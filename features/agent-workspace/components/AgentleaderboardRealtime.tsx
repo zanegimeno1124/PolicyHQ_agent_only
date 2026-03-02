@@ -632,7 +632,7 @@ export const AgentleaderboardRealtime: React.FC = () => {
                             <div className={`bg-${item.color}-500/10 p-4 rounded-2xl border border-${item.color}-500/20`}>
                                 <div className="text-xl font-black text-white tracking-tighter">{formatCurrency(item.amount)}</div>
                                 <div className="mt-1 flex items-center justify-between opacity-50">
-                                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Records</span>
+                                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Total Premium</span>
                                     <span className="text-[10px] font-black text-white">{item.count.toLocaleString()}</span>
                                 </div>
                             </div>
