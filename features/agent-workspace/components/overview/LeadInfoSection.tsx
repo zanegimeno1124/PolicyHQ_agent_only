@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Target, Loader2, Info, BarChart3 } from 'lucide-react';
@@ -14,6 +15,7 @@ interface LeadInfoSectionProps {
 const COLORS = ['#10b981', '#8b5cf6', '#f59e0b', '#3b82f6', '#ec4899', '#64748b', '#0ea5e9', '#f43f5e', '#84cc16'];
 
 export const LeadInfoSection: React.FC<LeadInfoSectionProps> = ({ agencyId, startDate, endDate }) => {
+  const navigate = useNavigate();
   const [data, setData] = useState<LeadBreakdownResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [hoveredSource, setHoveredSource] = useState<{
@@ -35,6 +37,7 @@ export const LeadInfoSection: React.FC<LeadInfoSectionProps> = ({ agencyId, star
     return data.source
       .filter(item => item.total_premium > 0 || item.submissions > 0)
       .map(item => ({
+        id: item.id,
         name: item.label,
         value: item.total_premium,
         submissions: item.submissions,
@@ -127,7 +130,8 @@ export const LeadInfoSection: React.FC<LeadInfoSectionProps> = ({ agencyId, star
               return (
                 <div 
                   key={idx} 
-                  className="space-y-2 group/row relative"
+                  className="space-y-2 group/row relative cursor-pointer hover:bg-slate-50 transition-colors rounded-lg p-2 -mx-2"
+                  onClick={() => navigate(`/leaderboard/realtime?sourceId=${item.id}`)}
                   onMouseEnter={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
                     setHoveredSource({ item, rect, idx });

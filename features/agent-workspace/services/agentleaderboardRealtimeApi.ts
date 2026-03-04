@@ -69,11 +69,21 @@ export const agentleaderboardRealtimeApi = {
   /**
    * Fetches production rankings for Today
    */
-  getRealtimeLeaderboard: async (agencyId: string | null = null): Promise<TodayLeaderboardResponse> => {
+  getRealtimeLeaderboard: async (agencyId: string | null = null, sourceId?: string): Promise<TodayLeaderboardResponse> => {
     const params = new URLSearchParams();
     if (agencyId) params.append('agency_id', agencyId);
     
-    const response = await fetch(`${BASE_URL}/arena/today?${params.toString()}`, {
+    let url = `${BASE_URL}/arena/today`;
+    if (sourceId) {
+      url = `${BASE_URL}/arena/today/${sourceId}`;
+    }
+    
+    const queryString = params.toString();
+    if (queryString) {
+      url += `?${queryString}`;
+    }
+    
+    const response = await fetch(url, {
       method: 'GET',
       headers: authHeader(),
     });
@@ -85,8 +95,13 @@ export const agentleaderboardRealtimeApi = {
   /**
    * Fetches production rankings for Month to Date (MTD)
    */
-  getMTDLeaderboard: async (): Promise<MTDLeaderboardResponse> => {
-    const response = await fetch(`${BASE_URL}/arena/mtd`, {
+  getMTDLeaderboard: async (sourceId?: string): Promise<MTDLeaderboardResponse> => {
+    let url = `${BASE_URL}/arena/mtd`;
+    if (sourceId) {
+      url = `${BASE_URL}/arena/mtd/${sourceId}`;
+    }
+
+    const response = await fetch(url, {
       method: 'GET',
       headers: authHeader(),
     });
@@ -98,8 +113,13 @@ export const agentleaderboardRealtimeApi = {
   /**
    * Fetches aggregated stats for the current week and year
    */
-  getWeekYearStats: async (): Promise<WeekYearResponse> => {
-    const response = await fetch(`${BASE_URL}/arena/week_year`, {
+  getWeekYearStats: async (sourceId?: string): Promise<WeekYearResponse> => {
+    let url = `${BASE_URL}/arena/week_year`;
+    if (sourceId) {
+      url = `${BASE_URL}/arena/week_year/${sourceId}`;
+    }
+
+    const response = await fetch(url, {
       method: 'GET',
       headers: authHeader(),
     });
@@ -111,8 +131,13 @@ export const agentleaderboardRealtimeApi = {
   /**
    * Fetches the recent sales feed for the arena
    */
-  getArenaFeed: async (): Promise<SaleRecord[]> => {
-    const response = await fetch(`${BASE_URL}/arena/feed`, {
+  getArenaFeed: async (sourceId?: string): Promise<SaleRecord[]> => {
+    let url = `${BASE_URL}/arena/feed`;
+    if (sourceId) {
+      url = `${BASE_URL}/arena/feed/${sourceId}`;
+    }
+
+    const response = await fetch(url, {
       method: 'GET',
       headers: authHeader(),
     });

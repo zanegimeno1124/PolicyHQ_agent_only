@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   ChevronLeft, 
   Zap, 
@@ -395,6 +395,8 @@ const AgentSummaryPopup: React.FC<{
 
 export const AgentleaderboardRealtime: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const sourceId = searchParams.get('sourceId') || undefined;
   const { latestSale } = useRealtime();
   
   const [isNightMode, setIsNightMode] = useState(() => {
@@ -508,10 +510,10 @@ export const AgentleaderboardRealtime: React.FC = () => {
     setRefreshing(true);
     try {
       const [todayRes, mtdRes, weekYearRes, feedRes] = await Promise.all([
-        agentleaderboardRealtimeApi.getRealtimeLeaderboard(),
-        agentleaderboardRealtimeApi.getMTDLeaderboard(),
-        agentleaderboardRealtimeApi.getWeekYearStats(),
-        agentleaderboardRealtimeApi.getArenaFeed()
+        agentleaderboardRealtimeApi.getRealtimeLeaderboard(null, sourceId),
+        agentleaderboardRealtimeApi.getMTDLeaderboard(sourceId),
+        agentleaderboardRealtimeApi.getWeekYearStats(sourceId),
+        agentleaderboardRealtimeApi.getArenaFeed(sourceId)
       ]);
 
       setTodayData(todayRes.today_rundown || []);
@@ -528,7 +530,7 @@ export const AgentleaderboardRealtime: React.FC = () => {
       if (isInitial) setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [sourceId]);
 
   useEffect(() => { refreshArena(true); }, [refreshArena]);
   useEffect(() => { if (latestSale) refreshArena(); }, [latestSale, refreshArena]);
