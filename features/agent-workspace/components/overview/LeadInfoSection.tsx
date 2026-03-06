@@ -99,7 +99,7 @@ export const LeadInfoSection: React.FC<LeadInfoSectionProps> = ({ agencyId, star
             <div className="p-2.5 bg-brand-50 rounded-xl text-brand-600 shadow-sm border border-brand-100">
               <Target className="w-5 h-5" />
             </div>
-            <h3 className="text-xl font-black text-slate-900 tracking-tight">Source Tracker</h3>
+            <h3 className="text-xl font-black text-slate-900 tracking-tight">Lead Source</h3>
           </div>
           <div className="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">
             <Info className="w-3 h-3" />
@@ -202,7 +202,7 @@ export const LeadInfoSection: React.FC<LeadInfoSectionProps> = ({ agencyId, star
           <div className="p-2.5 bg-indigo-50 rounded-xl text-indigo-600 shadow-sm border border-indigo-100">
             <BarChart3 className="w-5 h-5" />
           </div>
-          <h3 className="text-xl font-black text-slate-900 tracking-tight">Type Tracker</h3>
+          <h3 className="text-xl font-black text-slate-900 tracking-tight">Product Types</h3>
         </div>
 
         <div className="h-44 w-full relative mb-8">
