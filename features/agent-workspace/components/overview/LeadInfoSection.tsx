@@ -103,7 +103,7 @@ export const LeadInfoSection: React.FC<LeadInfoSectionProps> = ({ agencyId, star
           </div>
           <div className="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">
             <Info className="w-3 h-3" />
-            Distribution By Lead Origin
+            Click Distribution By Lead Origin
           </div>
         </div>
 
