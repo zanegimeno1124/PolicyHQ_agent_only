@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Trophy, ChevronDown, Star, Crown, Loader2, Users, FileCheck, CheckCircle2, Sparkles, TrendingUp } from 'lucide-react';
 import { TeamRankingEntry } from '../../services/agentOverviewApi';
 import { formatCurrencyCompact } from './utils';
@@ -51,6 +52,7 @@ export const TeamSalesSection: React.FC<TeamSalesSectionProps> = ({
   selectedAgencyLabel,
   onViewAll
 }) => {
+  const navigate = useNavigate();
   const sortedData = useMemo(() => {
     return [...teamRankingData].sort((a, b) => b.total_premium - a.total_premium);
   }, [teamRankingData]);
@@ -165,11 +167,17 @@ export const TeamSalesSection: React.FC<TeamSalesSectionProps> = ({
           </div>
 
           <div className="text-center relative z-10 w-full px-2">
-            <h4 className="text-2xl font-black text-slate-900 tracking-tight mb-4 drop-shadow-sm">
+            <h4 
+                className={`text-2xl font-black text-slate-900 tracking-tight mb-4 drop-shadow-sm ${featuredEntry ? 'cursor-pointer hover:text-indigo-600 transition-colors' : ''}`}
+                onClick={() => featuredEntry && navigate(`/leaderboard/realtime?teamId=${featuredEntry.id}`)}
+            >
               {featuredEntry?.name || 'Syncing Standings...'}
             </h4>
             
-            <div className="inline-flex flex-col items-center w-full max-w-[240px] px-6 py-4 bg-white/95 backdrop-blur-xl border border-white rounded-[2rem] shadow-[0_15px_40px_-10px_rgba(0,0,0,0.15)] group/val transition-transform hover:scale-105">
+            <div 
+                className={`inline-flex flex-col items-center w-full max-w-[240px] px-6 py-4 bg-white/95 backdrop-blur-xl border border-white rounded-[2rem] shadow-[0_15px_40px_-10px_rgba(0,0,0,0.15)] group/val transition-transform hover:scale-105 ${featuredEntry ? 'cursor-pointer' : ''}`}
+                onClick={() => featuredEntry && navigate(`/leaderboard/realtime?teamId=${featuredEntry.id}`)}
+            >
               <span className="text-[9px] font-black text-amber-600 uppercase tracking-[0.25em] mb-1">Production Value</span>
               <div className="flex items-center gap-3">
                 <span className="text-slate-900 text-3xl font-black tracking-tighter">
@@ -214,7 +222,11 @@ export const TeamSalesSection: React.FC<TeamSalesSectionProps> = ({
               // Calculate absolute rank based on original sorted data
               const rank = sortedData.findIndex(e => e.id === entry.id) + 1;
               return (
-                <div key={entry.id} className="flex items-center justify-between group/item">
+                <div 
+                  key={entry.id} 
+                  className="flex items-center justify-between group/item cursor-pointer hover:bg-slate-50 p-2 -mx-2 rounded-xl transition-all"
+                  onClick={() => navigate(`/leaderboard/realtime?teamId=${entry.id}`)}
+                >
                   <div className="flex items-center gap-5 min-w-0 flex-1">
                     <div className="w-8 shrink-0 flex justify-center">
                       {rank <= 3 ? (

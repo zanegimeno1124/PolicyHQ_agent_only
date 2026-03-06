@@ -69,12 +69,14 @@ export const agentleaderboardRealtimeApi = {
   /**
    * Fetches production rankings for Today
    */
-  getRealtimeLeaderboard: async (agencyId: string | null = null, sourceId?: string): Promise<TodayLeaderboardResponse> => {
+  getRealtimeLeaderboard: async (agencyId: string | null = null, sourceId?: string, teamId?: string): Promise<TodayLeaderboardResponse> => {
     const params = new URLSearchParams();
     if (agencyId) params.append('agency_id', agencyId);
     
     let url = `${BASE_URL}/arena/today`;
-    if (sourceId) {
+    if (teamId) {
+      url = `${BASE_URL}/team/arena/today/${teamId}`;
+    } else if (sourceId) {
       url = `${BASE_URL}/arena/today/${sourceId}`;
     }
     
@@ -95,9 +97,11 @@ export const agentleaderboardRealtimeApi = {
   /**
    * Fetches production rankings for Month to Date (MTD)
    */
-  getMTDLeaderboard: async (sourceId?: string): Promise<MTDLeaderboardResponse> => {
+  getMTDLeaderboard: async (sourceId?: string, teamId?: string): Promise<MTDLeaderboardResponse> => {
     let url = `${BASE_URL}/arena/mtd`;
-    if (sourceId) {
+    if (teamId) {
+      url = `${BASE_URL}/team/arena/mtd/${teamId}`;
+    } else if (sourceId) {
       url = `${BASE_URL}/arena/mtd/${sourceId}`;
     }
 
@@ -113,9 +117,11 @@ export const agentleaderboardRealtimeApi = {
   /**
    * Fetches aggregated stats for the current week and year
    */
-  getWeekYearStats: async (sourceId?: string): Promise<WeekYearResponse> => {
+  getWeekYearStats: async (sourceId?: string, teamId?: string): Promise<WeekYearResponse> => {
     let url = `${BASE_URL}/arena/week_year`;
-    if (sourceId) {
+    if (teamId) {
+      url = `${BASE_URL}/team/arena/week_year/${teamId}`;
+    } else if (sourceId) {
       url = `${BASE_URL}/arena/week_year/${sourceId}`;
     }
 
@@ -131,9 +137,11 @@ export const agentleaderboardRealtimeApi = {
   /**
    * Fetches the recent sales feed for the arena
    */
-  getArenaFeed: async (sourceId?: string): Promise<SaleRecord[]> => {
+  getArenaFeed: async (sourceId?: string, teamId?: string): Promise<SaleRecord[]> => {
     let url = `${BASE_URL}/arena/feed`;
-    if (sourceId) {
+    if (teamId) {
+      url = `${BASE_URL}/team/arena/feed/${teamId}`;
+    } else if (sourceId) {
       url = `${BASE_URL}/arena/feed/${sourceId}`;
     }
 

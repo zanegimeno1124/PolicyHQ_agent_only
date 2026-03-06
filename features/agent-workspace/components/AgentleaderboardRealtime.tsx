@@ -397,6 +397,7 @@ export const AgentleaderboardRealtime: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const sourceId = searchParams.get('sourceId') || undefined;
+  const teamId = searchParams.get('teamId') || undefined;
   const { latestSale } = useRealtime();
   
   const [isNightMode, setIsNightMode] = useState(() => {
@@ -510,10 +511,10 @@ export const AgentleaderboardRealtime: React.FC = () => {
     setRefreshing(true);
     try {
       const [todayRes, mtdRes, weekYearRes, feedRes] = await Promise.all([
-        agentleaderboardRealtimeApi.getRealtimeLeaderboard(null, sourceId),
-        agentleaderboardRealtimeApi.getMTDLeaderboard(sourceId),
-        agentleaderboardRealtimeApi.getWeekYearStats(sourceId),
-        agentleaderboardRealtimeApi.getArenaFeed(sourceId)
+        agentleaderboardRealtimeApi.getRealtimeLeaderboard(null, sourceId, teamId),
+        agentleaderboardRealtimeApi.getMTDLeaderboard(sourceId, teamId),
+        agentleaderboardRealtimeApi.getWeekYearStats(sourceId, teamId),
+        agentleaderboardRealtimeApi.getArenaFeed(sourceId, teamId)
       ]);
 
       setTodayData(todayRes.today_rundown || []);
@@ -530,7 +531,7 @@ export const AgentleaderboardRealtime: React.FC = () => {
       if (isInitial) setLoading(false);
       setRefreshing(false);
     }
-  }, [sourceId]);
+  }, [sourceId, teamId]);
 
   useEffect(() => { refreshArena(true); }, [refreshArena]);
   useEffect(() => { if (latestSale) refreshArena(); }, [latestSale, refreshArena]);
