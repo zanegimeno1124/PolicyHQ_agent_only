@@ -141,13 +141,13 @@ const AgentLayout: React.FC = () => {
     : 'HQ';
 
   return (
-    <div className="h-screen bg-[#F2F3F5] flex font-sans overflow-hidden p-4 gap-4 selection:bg-brand-500/30 selection:text-brand-900">
+    <div className="h-screen bg-[#D4DBE5] flex font-sans overflow-hidden p-4 gap-4 selection:bg-brand-500/30 selection:text-brand-900">
       {/* Floating Sidebar */}
       <aside 
         className={`
           ${isCollapsed ? 'w-24 px-3' : 'w-80 px-6'} 
           bg-white rounded-[2.5rem] flex flex-col transition-[width,padding] duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1.0)] 
-          shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] border border-white/60 relative z-20 shrink-0 py-8
+          shadow-[0_20px_60px_-10px_rgba(0,0,0,0.12)] border border-slate-200/80 relative z-20 shrink-0 py-8
         `}
       >
         {/* Toggle Handle */}
@@ -302,7 +302,7 @@ const AgentLayout: React.FC = () => {
             </div>
         ) : (
             <div className="flex-1 overflow-y-auto scroll-smooth scrollbar-hide">
-            <header className="h-24 sticky top-0 z-[100] px-6 flex items-center justify-between mb-2 bg-[#F2F3F5]/80 backdrop-blur-md">
+            <header className="h-24 sticky top-0 z-[100] px-6 flex items-center justify-between mb-2 bg-[#D4DBE5]/80 backdrop-blur-md">
                 <div className="flex items-center gap-4">
                     <h2 className="text-3xl font-black text-slate-900 tracking-tighter">
                     {viewingAgentName}
