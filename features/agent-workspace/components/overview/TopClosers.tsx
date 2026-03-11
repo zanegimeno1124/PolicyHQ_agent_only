@@ -10,6 +10,7 @@ interface TopClosersProps {
   selectedAgencyLabel: string;
   dateRangeLabel: string;
   onViewAll: () => void;
+  onAgentClick?: (agentId: string) => void;
 }
 
 const getInitials = (name: string) => {
@@ -27,21 +28,23 @@ const PodiumCircle = ({
   size, 
   color, 
   glow, 
-  className = "" 
+  className = "",
+  onClick
 }: { 
   entry: AllTimeLeaderboardEntry | null, 
   rank: number, 
   size: string, 
   color: string, 
   glow: string,
-  className?: string
+  className?: string,
+  onClick?: () => void
 }) => {
   if (!entry) return <div className={`${size} rounded-full border border-white/5 bg-white/5 opacity-20 ${className}`} />;
 
   const avatarUrl = entry.agent_profile?.url;
 
   return (
-    <div className={`flex flex-col items-center group/circle transition-all duration-500 ${className}`}>
+    <div onClick={onClick} className={`flex flex-col items-center group/circle transition-all duration-500 ${className} ${onClick ? 'cursor-pointer' : ''}`}>
       {rank === 1 && (
         <div className="flex gap-1 mb-2 animate-bounce-slow">
             <Star className="w-3 h-3 text-brand-400 fill-brand-400" />
@@ -98,7 +101,8 @@ export const TopClosers: React.FC<TopClosersProps> = ({
   loading, 
   selectedAgencyLabel,
   dateRangeLabel,
-  onViewAll
+  onViewAll,
+  onAgentClick
 }) => {
   const podium = useMemo(() => {
     return [
@@ -166,6 +170,7 @@ export const TopClosers: React.FC<TopClosersProps> = ({
                         color="bg-gradient-to-tr from-orange-600 to-orange-400" 
                         glow="shadow-[0_0_30px_rgba(234,88,12,0.2)]"
                         className="z-10 translate-x-4 scale-95"
+                        onClick={podium[2] ? () => onAgentClick?.(podium[2]!.agent_id) : undefined}
                       />
 
                       {/* Rank 1 (Center) */}
@@ -176,6 +181,7 @@ export const TopClosers: React.FC<TopClosersProps> = ({
                         color="bg-gradient-to-tr from-brand-400 via-yellow-200 to-brand-600" 
                         glow="shadow-[0_0_50px_rgba(245,158,11,0.4)]"
                         className="z-30 scale-110 -mb-2"
+                        onClick={podium[0] ? () => onAgentClick?.(podium[0]!.agent_id) : undefined}
                       />
 
                       {/* Rank 2 (Right) */}
@@ -186,6 +192,7 @@ export const TopClosers: React.FC<TopClosersProps> = ({
                         color="bg-gradient-to-tr from-slate-300 to-slate-100" 
                         glow="shadow-[0_0_30px_rgba(255,255,255,0.1)]"
                         className="z-20 -translate-x-4"
+                        onClick={podium[1] ? () => onAgentClick?.(podium[1]!.agent_id) : undefined}
                       />
                   </div>
               </>
@@ -206,7 +213,7 @@ export const TopClosers: React.FC<TopClosersProps> = ({
                     <span className="text-[9px] font-bold text-indigo-300/20 bg-white/5 px-2 py-0.5 rounded-md border border-white/5">Ranks 4 - {3 + challengers.length}</span>
                   </div>
                   {challengers.map((agent, idx) => (
-                      <div key={agent.agent_id} className="flex items-center justify-between p-4 rounded-3xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group/item hover:scale-[1.02] cursor-default">
+                      <div key={agent.agent_id} onClick={() => onAgentClick?.(agent.agent_id)} className={`flex items-center justify-between p-4 rounded-3xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all group/item hover:scale-[1.02] ${onAgentClick ? 'cursor-pointer' : 'cursor-default'}`}>
                           <div className="flex items-center gap-5 min-w-0">
                               {/* List Rank Indicator */}
                               <div className="w-8 h-8 rounded-xl bg-slate-900 border border-white/10 flex items-center justify-center shrink-0">

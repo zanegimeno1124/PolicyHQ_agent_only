@@ -23,7 +23,8 @@ import {
   ArrowRight,
   LayoutDashboard,
   Moon,
-  Sun
+  Sun,
+  Share2
 } from 'lucide-react';
 import { agentleaderboardRealtimeApi, ArenaEntry, SaleRecord } from '../services/agentleaderboardRealtimeApi';
 import { useRealtime } from '../../../context/RealtimeContext';
@@ -229,7 +230,7 @@ const LeaderboardList: React.FC<{
   );
 };
 
-const AgentSummaryPopup: React.FC<{
+export const AgentSummaryPopup: React.FC<{
   stats: {
     agent_id: string;
     agent_name: string;
@@ -238,6 +239,7 @@ const AgentSummaryPopup: React.FC<{
     today: { premium: number; apps: number };
     mtd: { premium: number; apps: number };
     recentSales: SaleRecord[];
+    sources: string[];
   };
   isNightMode: boolean;
   onClose: () => void;
@@ -325,6 +327,24 @@ const AgentSummaryPopup: React.FC<{
               </div>
 
               <div className="space-y-4">
+                  <div className="flex items-center gap-2 px-1">
+                    <Share2 className="w-3.5 h-3.5 text-indigo-400" />
+                    <h4 className={`text-[10px] font-black uppercase tracking-widest ${isNightMode ? 'text-slate-500' : 'text-slate-400'}`}>Recent Lead Sources</h4>
+                  </div>
+                  {stats.sources.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {stats.sources.map(src => (
+                        <span key={src} className={`px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border ${
+                          isNightMode ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-300' : 'bg-indigo-50 border-indigo-100 text-indigo-600'
+                        }`}>{src}</span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className={`text-[9px] font-bold px-1 ${isNightMode ? 'text-slate-600' : 'text-slate-300'}`}>No source data available</p>
+                  )}
+              </div>
+
+              <div className="space-y-4">
                   <div className="flex items-center justify-between px-1">
                       <div className="flex items-center gap-2">
                         <Star className="w-3.5 h-3.5 text-brand-500 fill-brand-500" />
@@ -399,7 +419,13 @@ export const AgentleaderboardRealtime: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const sourceId = searchParams.get('sourceId') || undefined;
+  const sourceNameParam = searchParams.get('sourceName') || undefined;
   const teamId = searchParams.get('teamId') || undefined;
+  const _validTf = ['today', 'weekly', 'monthly', 'yearly', 'custom'] as const;
+  const _tfParam = searchParams.get('timeframe') || '';
+  const initTimeframe = (_validTf as readonly string[]).includes(_tfParam) ? _tfParam as typeof _validTf[number] : 'today';
+  const initStartDate = searchParams.get('startDate') || '';
+  const initEndDate = searchParams.get('endDate') || '';
   const { latestSale } = useRealtime();
   
   const [isNightMode, setIsNightMode] = useState(() => {
@@ -464,12 +490,12 @@ export const AgentleaderboardRealtime: React.FC = () => {
   // Integrated Leaderboard States
   const [unifiedData, setUnifiedData] = useState<ArenaEntry[]>([]);
   const [leaderboardMode, setLeaderboardMode] = useState<'agent' | 'team' | 'source'>('agent');
-  const [timeframe, setTimeframe] = useState<'today' | 'weekly' | 'monthly' | 'yearly' | 'custom'>('today');
-  const [dateRange, setDateRange] = useState({ startDate: '', endDate: '' });
-  const [selectedTeamsFilter, setSelectedTeamsFilter] = useState<string[]>([]);
+  const [timeframe, setTimeframe] = useState<'today' | 'weekly' | 'monthly' | 'yearly' | 'custom'>(initTimeframe);
+  const [dateRange, setDateRange] = useState({ startDate: initStartDate, endDate: initEndDate });
+  const [selectedTeamsFilter, setSelectedTeamsFilter] = useState<string[]>(teamId ? [teamId] : []);
   const [selectedAgentsFilter, setSelectedAgentsFilter] = useState<string[]>([]);
-  const [selectedSourceFilter, setSelectedSourceFilter] = useState<string | undefined>(undefined);
-  const [selectedSourceName, setSelectedSourceName] = useState<string | undefined>(undefined);
+  const [selectedSourceFilter, setSelectedSourceFilter] = useState<string | undefined>(sourceId);
+  const [selectedSourceName, setSelectedSourceName] = useState<string | undefined>(sourceNameParam);
   const [selectedAgencyFilter, setSelectedAgencyFilter] = useState<string[]>([]);
 
   const [loading, setLoading] = useState(true);
@@ -492,7 +518,8 @@ export const AgentleaderboardRealtime: React.FC = () => {
         agency: todayMatch?.agency || mtdMatch?.agency || feedMatch?.teamName || 'Organization',
         today: { premium: todayMatch?.total_annualPremium || 0, apps: todayMatch?.records || 0 },
         mtd: { premium: mtdMatch?.total_annualPremium || 0, apps: mtdMatch?.records || 0 },
-        recentSales: feedMatches
+        recentSales: feedMatches,
+        sources: [...new Set(feedMatches.map(s => s.sourceName).filter(Boolean))]
     };
   }, [selectedAgentId, todayData, mtdData, arenaFeed]);
 
@@ -614,6 +641,12 @@ export const AgentleaderboardRealtime: React.FC = () => {
         }));
       }
       setUnifiedData(finalUnifiedData);
+
+      // Resolve source name from fetched data when coming from URL param
+      if (sourceId && !selectedSourceName) {
+        const match = finalUnifiedData.find(d => d.agent_id === sourceId);
+        if (match) setSelectedSourceName(match.agent_name);
+      }
       
       setLastSync(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
     } catch (error) {

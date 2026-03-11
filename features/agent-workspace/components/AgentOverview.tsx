@@ -26,6 +26,8 @@ import { PerformanceMetrics } from './overview/PerformanceMetrics';
 import { CarrierSection } from './overview/CarrierSection';
 import { TeamSalesSection } from './overview/TeamSalesSection';
 import { TopClosers } from './overview/TopClosers';
+import { AgentSummaryPopup } from './AgentleaderboardRealtime';
+import { agentleaderboardRealtimeApi, SaleRecord } from '../services/agentleaderboardRealtimeApi';
 import { LeadInfoSection } from './overview/LeadInfoSection';
 import { ClosersDrawer, CarrierDrawer, TeamRankingDrawer } from './overview/OverviewDrawers';
 import { MiniDatePicker } from './overview/MiniDatePicker';
@@ -53,6 +55,42 @@ export const AgentOverview: React.FC = () => {
   const [isAllClosersDrawerOpen, setIsAllClosersDrawerOpen] = useState(false);
   const [isCarrierDrawerOpen, setIsCarrierDrawerOpen] = useState(false);
   const [isTeamDrawerOpen, setIsTeamDrawerOpen] = useState(false);
+  const [popupStats, setPopupStats] = useState<{
+    agent_id: string; agent_name: string; agent_profile_url?: string | null;
+    agency: string; today: { premium: number; apps: number };
+    mtd: { premium: number; apps: number }; recentSales: SaleRecord[]; sources: string[];
+  } | null>(null);
+  const [popupLoading, setPopupLoading] = useState(false);
+
+  const handleAgentClick = async (agentId: string) => {
+    setPopupLoading(true);
+    setPopupStats(null);
+    try {
+      const [todayRes, mtdRes, feedRes] = await Promise.all([
+        agentleaderboardRealtimeApi.getRealtimeLeaderboard(null),
+        agentleaderboardRealtimeApi.getMTDLeaderboard(),
+        agentleaderboardRealtimeApi.getArenaFeed(),
+      ]);
+      const todayMatch = (todayRes.today_rundown || []).find((e: any) => e.agent_id === agentId);
+      const mtdMatch = (mtdRes.mtd_rundown || []).find((e: any) => e.agent_id === agentId);
+      const feedMatches: SaleRecord[] = (feedRes || []).filter((e: any) => e.agentId === agentId);
+      const entry = leaderboardData.find(e => e.agent_id === agentId);
+      setPopupStats({
+        agent_id: agentId,
+        agent_name: entry?.agent_name || todayMatch?.agent_name || 'Agent',
+        agent_profile_url: entry?.agent_profile?.url || todayMatch?.agent_profile?.url || null,
+        agency: (entry?.agency as any)?.label || todayMatch?.agency || 'Organization',
+        today: { premium: todayMatch?.total_annualPremium || 0, apps: todayMatch?.records || 0 },
+        mtd: { premium: mtdMatch?.total_annualPremium || 0, apps: mtdMatch?.records || 0 },
+        recentSales: feedMatches,
+        sources: [...new Set(feedMatches.map((s: SaleRecord) => s.sourceName).filter(Boolean))],
+      });
+    } catch (err) {
+      console.error('Agent popup fetch failed', err);
+    } finally {
+      setPopupLoading(false);
+    }
+  };
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
@@ -136,7 +174,7 @@ export const AgentOverview: React.FC = () => {
             <div className="relative border-r border-slate-100 pr-1" ref={dropdownRef}>
                 <button 
                     onClick={() => setIsAgencyDropdownOpen(!isAgencyDropdownOpen)}
-                    className={`flex items-center gap-3 px-5 py-2.5 rounded-full transition-all group ${isAgencyDropdownOpen ? 'bg-slate-50' : 'hover:bg-slate-50'}`}
+                    className={`flex items-center gap-3 px-5 py-2.5 rounded-full transition-all group border ${isAgencyDropdownOpen ? 'bg-slate-100 border-slate-200 shadow-inner' : 'border-slate-200 hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm'}`}
                 >
                     <div className="p-1.5 bg-slate-900 rounded-lg text-brand-500 shadow-lg shadow-slate-900/10 transition-transform group-hover:scale-105">
                         <Building2 className="w-3.5 h-3.5" strokeWidth={3} />
@@ -244,6 +282,7 @@ export const AgentOverview: React.FC = () => {
             agencyId={selectedAgencyId}
             startDate={dateRange.start}
             endDate={dateRange.end}
+            dateRangeLabel={dateRange.label}
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
@@ -257,6 +296,8 @@ export const AgentOverview: React.FC = () => {
               teamRankingData={teamRankingData} 
               loading={loadingTeams} 
               dateRangeLabel={dateRange.label.toUpperCase()}
+              dateRangeStart={dateRange.start}
+              dateRangeEnd={dateRange.end}
               selectedAgencyLabel={selectedAgencyLabel}
               onViewAll={() => setIsTeamDrawerOpen(true)}
             />
@@ -271,6 +312,7 @@ export const AgentOverview: React.FC = () => {
             selectedAgencyLabel={selectedAgencyLabel.toUpperCase()}
             dateRangeLabel={dateRange.label}
             onViewAll={() => setIsAllClosersDrawerOpen(true)}
+            onAgentClick={handleAgentClick}
           />
         </div>
       </div>
@@ -296,6 +338,19 @@ export const AgentOverview: React.FC = () => {
         data={teamRankingData}
         dateRangeLabel={dateRange.label}
       />
+
+      {/* Agent Summary Popup - loading state */}
+      {popupLoading && (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center">
+          <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md" onClick={() => setPopupLoading(false)} />
+          <div className="relative w-16 h-16 rounded-full border border-white/10 bg-slate-900 flex items-center justify-center">
+            <svg className="animate-spin w-8 h-8 text-brand-500" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+          </div>
+        </div>
+      )}
+      {popupStats && (
+        <AgentSummaryPopup stats={popupStats} isNightMode={false} onClose={() => setPopupStats(null)} />
+      )}
     </div>
   );
 };

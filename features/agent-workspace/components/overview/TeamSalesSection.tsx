@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, ChevronDown, Star, Crown, Loader2, Users, FileCheck, CheckCircle2, Sparkles, TrendingUp } from 'lucide-react';
+import { Trophy, ChevronDown, Star, Crown, Loader2, Users, FileCheck, CheckCircle2, Sparkles, TrendingUp, ArrowRight } from 'lucide-react';
 import { TeamRankingEntry } from '../../services/agentOverviewApi';
 import { formatCurrencyCompact } from './utils';
 
@@ -8,8 +8,19 @@ interface TeamSalesSectionProps {
   teamRankingData: TeamRankingEntry[];
   loading: boolean;
   dateRangeLabel: string;
+  dateRangeStart?: number | null;
+  dateRangeEnd?: number | null;
   selectedAgencyLabel: string;
   onViewAll: () => void;
+}
+
+function mapLabelToTimeframe(label: string): string {
+  const n = label.toUpperCase();
+  if (n === 'TODAY') return 'today';
+  if (n === 'THIS WEEK') return 'weekly';
+  if (n === 'THIS MONTH' || n === 'MONTHLY') return 'monthly';
+  if (n === 'THIS YEAR' || n === 'YEARLY') return 'yearly';
+  return 'custom';
 }
 
 const RankRibbon = ({ rank, size = 24 }: { rank: number; size?: number }) => {
@@ -49,10 +60,16 @@ export const TeamSalesSection: React.FC<TeamSalesSectionProps> = ({
   teamRankingData, 
   loading,
   dateRangeLabel,
+  dateRangeStart,
+  dateRangeEnd,
   selectedAgencyLabel,
   onViewAll
 }) => {
   const navigate = useNavigate();
+  const tf = mapLabelToTimeframe(dateRangeLabel);
+  const dateParams = tf === 'custom' && dateRangeStart && dateRangeEnd
+    ? `&startDate=${new Date(dateRangeStart).toISOString().split('T')[0]}&endDate=${new Date(dateRangeEnd).toISOString().split('T')[0]}`
+    : '';
   const sortedData = useMemo(() => {
     return [...teamRankingData].sort((a, b) => b.total_premium - a.total_premium);
   }, [teamRankingData]);
@@ -169,14 +186,14 @@ export const TeamSalesSection: React.FC<TeamSalesSectionProps> = ({
           <div className="text-center relative z-10 w-full px-2">
             <h4 
                 className={`text-2xl font-black text-slate-900 tracking-tight mb-4 drop-shadow-sm ${featuredEntry ? 'cursor-pointer hover:text-indigo-600 transition-colors' : ''}`}
-                onClick={() => featuredEntry && navigate(`/leaderboard/realtime?teamId=${featuredEntry.id}`)}
+                onClick={() => featuredEntry && navigate(`/leaderboard/realtime?teamId=${featuredEntry.id}&timeframe=${tf}${dateParams}`)}
             >
               {featuredEntry?.name || 'Syncing Standings...'}
             </h4>
             
             <div 
                 className={`inline-flex flex-col items-center w-full max-w-[240px] px-6 py-4 bg-white/95 backdrop-blur-xl border border-white rounded-[2rem] shadow-[0_15px_40px_-10px_rgba(0,0,0,0.15)] group/val transition-transform hover:scale-105 ${featuredEntry ? 'cursor-pointer' : ''}`}
-                onClick={() => featuredEntry && navigate(`/leaderboard/realtime?teamId=${featuredEntry.id}`)}
+                onClick={() => featuredEntry && navigate(`/leaderboard/realtime?teamId=${featuredEntry.id}&timeframe=${tf}${dateParams}`)}
             >
               <span className="text-[9px] font-black text-amber-600 uppercase tracking-[0.25em] mb-1">Production Value</span>
               <div className="flex items-center gap-3">
@@ -225,7 +242,7 @@ export const TeamSalesSection: React.FC<TeamSalesSectionProps> = ({
                 <div 
                   key={entry.id} 
                   className="flex items-center justify-between group/item cursor-pointer hover:bg-slate-50 p-2 -mx-2 rounded-xl transition-all"
-                  onClick={() => navigate(`/leaderboard/realtime?teamId=${entry.id}`)}
+                  onClick={() => navigate(`/leaderboard/realtime?teamId=${entry.id}&timeframe=${tf}${dateParams}`)}
                 >
                   <div className="flex items-center gap-5 min-w-0 flex-1">
                     <div className="w-8 shrink-0 flex justify-center">
@@ -273,11 +290,14 @@ export const TeamSalesSection: React.FC<TeamSalesSectionProps> = ({
                     </div>
                   </div>
 
-                  <div className="text-right shrink-0 ml-4">
-                    <p className="text-base font-black text-slate-900 tracking-tighter group-hover/item:text-amber-500 transition-colors">
-                      {formatCurrencyCompact(entry.total_premium)}
-                    </p>
-                    <p className="text-[9px] font-extrabold text-slate-300 uppercase tracking-widest">Premium</p>
+                  <div className="flex items-center gap-2 shrink-0 ml-4">
+                    <div className="text-right">
+                      <p className="text-base font-black text-slate-900 tracking-tighter group-hover/item:text-amber-500 transition-colors">
+                        {formatCurrencyCompact(entry.total_premium)}
+                      </p>
+                      <p className="text-[9px] font-extrabold text-slate-300 uppercase tracking-widest">Premium</p>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-indigo-400 opacity-0 -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all duration-200" />
                   </div>
                 </div>
               );

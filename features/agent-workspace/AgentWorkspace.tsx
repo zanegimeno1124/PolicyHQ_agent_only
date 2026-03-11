@@ -302,7 +302,7 @@ const AgentLayout: React.FC = () => {
             </div>
         ) : (
             <div className="flex-1 overflow-y-auto scroll-smooth scrollbar-hide">
-            <header className="h-24 sticky top-0 z-[100] px-6 flex items-center justify-between mb-2 bg-[#D4DBE5]/80 backdrop-blur-md">
+            <header className="h-24 sticky top-0 z-[100] px-6 flex items-center justify-between mb-2 bg-white/60 backdrop-blur-md rounded-2xl mt-2 mx-2 shadow-sm border border-white/80">
                 <div className="flex items-center gap-4">
                     <h2 className="text-3xl font-black text-slate-900 tracking-tighter">
                     {viewingAgentName}
@@ -320,7 +320,7 @@ const AgentLayout: React.FC = () => {
                 </div>
             </header>
 
-            <div className="px-6 pb-12 max-w-[1600px] mx-auto">
+            <div className="px-6 pt-4 pb-12 max-w-[1600px] mx-auto">
                 <Routes>
                   <Route path="/" element={<AgentOverview />} />
                   <Route path="/leaderboard/realtime" element={<AgentleaderboardRealtime />} />

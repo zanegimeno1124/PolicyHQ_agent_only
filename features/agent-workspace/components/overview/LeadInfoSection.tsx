@@ -3,19 +3,33 @@ import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { Target, Loader2, Info, BarChart3 } from 'lucide-react';
+import { Target, Loader2, Info, BarChart3, ArrowRight } from 'lucide-react';
 import { agentOverviewApi, LeadBreakdownResponse } from '../../services/agentOverviewApi';
 
 interface LeadInfoSectionProps {
   agencyId: string | null;
   startDate: number | null;
   endDate: number | null;
+  dateRangeLabel?: string;
+}
+
+function mapLabelToTimeframe(label: string): string {
+  const n = label.toUpperCase();
+  if (n === 'TODAY') return 'today';
+  if (n === 'THIS WEEK') return 'weekly';
+  if (n === 'THIS MONTH' || n === 'MONTHLY') return 'monthly';
+  if (n === 'THIS YEAR' || n === 'YEARLY') return 'yearly';
+  return 'custom';
 }
 
 const COLORS = ['#10b981', '#8b5cf6', '#f59e0b', '#3b82f6', '#ec4899', '#64748b', '#0ea5e9', '#f43f5e', '#84cc16'];
 
-export const LeadInfoSection: React.FC<LeadInfoSectionProps> = ({ agencyId, startDate, endDate }) => {
+export const LeadInfoSection: React.FC<LeadInfoSectionProps> = ({ agencyId, startDate, endDate, dateRangeLabel }) => {
   const navigate = useNavigate();
+  const tf = mapLabelToTimeframe(dateRangeLabel || '');
+  const dateParams = tf === 'custom' && startDate && endDate
+    ? `&startDate=${new Date(startDate).toISOString().split('T')[0]}&endDate=${new Date(endDate).toISOString().split('T')[0]}`
+    : '';
   const [data, setData] = useState<LeadBreakdownResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [hoveredSource, setHoveredSource] = useState<{
@@ -130,17 +144,19 @@ export const LeadInfoSection: React.FC<LeadInfoSectionProps> = ({ agencyId, star
               return (
                 <div 
                   key={idx} 
-                  className="space-y-2 group/row relative cursor-pointer hover:bg-slate-50 transition-colors rounded-lg p-2 -mx-2"
-                  onClick={() => navigate(`/leaderboard/realtime?sourceId=${item.id}`)}
-                  onMouseEnter={(e) => {
+                  className="space-y-2 group/row relative cursor-pointer hover:bg-indigo-50 hover:border-indigo-100 border border-transparent hover:scale-[1.01] hover:shadow-sm transition-all rounded-xl p-2 -mx-2"
+                  onClick={() => navigate(`/leaderboard/realtime?sourceId=${item.id}&sourceName=${encodeURIComponent(item.name)}&timeframe=${tf}${dateParams}`)}                  onMouseEnter={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
                     setHoveredSource({ item, rect, idx });
                   }}
                   onMouseLeave={() => setHoveredSource(null)}
                 >
                   <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-wider">
-                    <span className="text-slate-500">{item.name}</span>
-                    <span className="text-slate-900">{Math.round(percentage)}%</span>
+                    <span className="text-slate-500 group-hover/row:text-indigo-700 transition-colors">{item.name}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-slate-900 group-hover/row:text-indigo-700 transition-colors">{Math.round(percentage)}%</span>
+                      <ArrowRight className="w-3 h-3 text-indigo-400 opacity-0 group-hover/row:opacity-100 -translate-x-1 group-hover/row:translate-x-0 transition-all duration-200" />
+                    </div>
                   </div>
                   <div className="h-2.5 w-full bg-slate-50 rounded-full overflow-hidden border border-slate-100/50">
                     <div 
