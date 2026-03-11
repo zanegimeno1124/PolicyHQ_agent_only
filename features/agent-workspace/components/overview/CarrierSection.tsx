@@ -32,7 +32,7 @@ export const CarrierSection: React.FC<CarrierSectionProps> = ({
                 <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 text-slate-900 shadow-sm">
                     <Briefcase className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-black text-slate-900 tracking-tight">Carrier Performance</h3>
+                <h3 className="text-xl font-black text-slate-900 tracking-tight">Carrier Rankings</h3>
             </div>
             <span className="text-[10px] font-bold text-slate-400 bg-slate-50 px-4 py-2 rounded-full border border-slate-100 uppercase tracking-widest">
                 {loading ? '...' : carrierBreakdown.length} Active Partners

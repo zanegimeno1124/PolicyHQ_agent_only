@@ -27,6 +27,8 @@ import {
 } from 'lucide-react';
 import { agentleaderboardRealtimeApi, ArenaEntry, SaleRecord } from '../services/agentleaderboardRealtimeApi';
 import { useRealtime } from '../../../context/RealtimeContext';
+import { LeaderboardControls } from './LeaderboardControls';
+import { AgentComparisonView } from './AgentComparisonView';
 
 const formatShort = (val: number) => {
   if (val >= 1000) {
@@ -458,6 +460,18 @@ export const AgentleaderboardRealtime: React.FC = () => {
   const [weekSummary, setWeekSummary] = useState({ total_premium: 0, total_records: 0 });
   const [yearSummary, setYearSummary] = useState({ total_premium: 0, total_records: 0 });
   const [arenaFeed, setArenaFeed] = useState<SaleRecord[]>([]);
+
+  // Integrated Leaderboard States
+  const [unifiedData, setUnifiedData] = useState<ArenaEntry[]>([]);
+  const [leaderboardMode, setLeaderboardMode] = useState<'agent' | 'team' | 'source'>('agent');
+  const [timeframe, setTimeframe] = useState<'today' | 'weekly' | 'monthly' | 'yearly' | 'custom'>('today');
+  const [dateRange, setDateRange] = useState({ startDate: '', endDate: '' });
+  const [selectedTeamsFilter, setSelectedTeamsFilter] = useState<string[]>([]);
+  const [selectedAgentsFilter, setSelectedAgentsFilter] = useState<string[]>([]);
+  const [selectedSourceFilter, setSelectedSourceFilter] = useState<string | undefined>(undefined);
+  const [selectedSourceName, setSelectedSourceName] = useState<string | undefined>(undefined);
+  const [selectedAgencyFilter, setSelectedAgencyFilter] = useState<string[]>([]);
+
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [lastSync, setLastSync] = useState<string>('Initializing');
@@ -487,6 +501,37 @@ export const AgentleaderboardRealtime: React.FC = () => {
     setIsNightMode(next);
     localStorage.setItem('arena_theme', next ? 'night' : 'light');
   };
+
+  // Dynamically extract agents from the currently loaded leaderboard payload 
+  // so you don't have to query a separate /meta list!
+  const availableAgents = useMemo(() => {
+    if (leaderboardMode !== 'agent') return [];
+    return unifiedData.map(a => ({
+      id: a.agent_id,
+      name: a.agent_name
+    }));
+  }, [unifiedData, leaderboardMode]);
+
+  const availableAgencies = useMemo(() => {
+    if (leaderboardMode !== 'agent') return [];
+    const seen = new Set<string>();
+    return unifiedData
+      .filter(a => a.agency && !seen.has(a.agency) && seen.add(a.agency))
+      .map(a => ({ id: a.agency, name: a.agency }));
+  }, [unifiedData, leaderboardMode]);
+
+  const displayData = useMemo(() => {
+    if (leaderboardMode !== 'agent' || selectedAgencyFilter.length === 0) return unifiedData;
+    return unifiedData.filter(a => selectedAgencyFilter.includes(a.agency));
+  }, [unifiedData, selectedAgencyFilter, leaderboardMode]);
+
+  // For teams and sources, you can either pass them in as props, fetch them globally, 
+  // or derive them from the data if your API payload includes them. 
+  // For now, left as empty arrays or you can map them similarly.
+  const [availableTeams, setAvailableTeams] = useState<{ id: string; name: string }[]>([]);
+  const [availableSources, setAvailableSources] = useState<{ id: string; name: string }[]>([]);
+
+
 
   useEffect(() => {
     const updateCountdown = () => {
@@ -524,6 +569,52 @@ export const AgentleaderboardRealtime: React.FC = () => {
       setWeekSummary(weekYearRes.week_application || { total_premium: 0, total_records: 0 });
       setYearSummary(weekYearRes.year_application || { total_premium: 0, total_records: 0 });
       setArenaFeed(feedRes || []);
+
+      let finalUnifiedData: ArenaEntry[] = [];
+      const basePayload = {
+        timeframe,
+        startDate: timeframe === 'custom' ? (dateRange.startDate || null) : null,
+        endDate: timeframe === 'custom' ? (dateRange.endDate || null) : null,
+      };
+
+      if (leaderboardMode === 'agent') {
+        const agentsRaw = await agentleaderboardRealtimeApi.getAgentLeaderboard({
+          ...basePayload,
+          teamId: selectedTeamsFilter.length > 0 ? selectedTeamsFilter[0] : null,
+          sourceId: selectedSourceFilter || null,
+        });
+        const agentsData = Array.isArray(agentsRaw) ? agentsRaw : (agentsRaw as any)?.rundown ?? [];
+        finalUnifiedData = agentsData.map((a: any) => ({
+          agent_id: a.agent_id,
+          agent_name: a.agent_name,
+          total_annualPremium: a.total_annualPremium,
+          records: a.records,
+          agency: a.agency || '',
+          agent_profile: a.agent_profile
+        }));
+      } else if (leaderboardMode === 'team') {
+        const teamsRaw = await agentleaderboardRealtimeApi.getTeamLeaderboard(basePayload);
+        const teamsData = Array.isArray(teamsRaw) ? teamsRaw : (teamsRaw as any)?.rundown ?? [];
+        finalUnifiedData = teamsData.map((t: any) => ({
+          agent_id: t.team_id,
+          agent_name: t.team_name,
+          total_annualPremium: t.total_annualPremium,
+          records: t.records,
+          agency: 'Team'
+        }));
+      } else if (leaderboardMode === 'source') {
+        const sourceRaw = await agentleaderboardRealtimeApi.getSourceLeaderboard(basePayload);
+        const sourceData = Array.isArray(sourceRaw) ? sourceRaw : (sourceRaw as any)?.rundown ?? [];
+        finalUnifiedData = sourceData.map((s: any) => ({
+          agent_id: s.source_id,
+          agent_name: s.source_name,
+          total_annualPremium: s.total_annualPremium,
+          records: s.records,
+          agency: 'Source'
+        }));
+      }
+      setUnifiedData(finalUnifiedData);
+      
       setLastSync(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
     } catch (error) {
       console.error("Realtime Refresh Error:", error);
@@ -531,7 +622,7 @@ export const AgentleaderboardRealtime: React.FC = () => {
       if (isInitial) setLoading(false);
       setRefreshing(false);
     }
-  }, [sourceId, teamId]);
+  }, [sourceId, teamId, timeframe, dateRange, leaderboardMode, selectedTeamsFilter, selectedAgentsFilter, selectedSourceFilter]);
 
   useEffect(() => { refreshArena(true); }, [refreshArena]);
   useEffect(() => { if (latestSale) refreshArena(); }, [latestSale, refreshArena]);
@@ -601,12 +692,63 @@ export const AgentleaderboardRealtime: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-8 items-stretch h-[800px]">
-          <div className="xl:col-span-1 flex flex-col h-full overflow-hidden">
-            <LeaderboardList title="Today's Standings" icon={<Zap className="w-4 h-4 fill-brand-500" />} data={todayData} loading={loading} isNightMode={isNightMode} accentColor="bg-brand-50 text-brand-600" onSelectAgent={setSelectedAgentId} />
-          </div>
-
-          <div className="xl:col-span-2 flex flex-col h-full overflow-hidden">
-            <LeaderboardList title="Month to Date" icon={<Trophy className="w-4 h-4" />} data={mtdData} loading={loading} isNightMode={isNightMode} accentColor="bg-indigo-50 text-indigo-600" isMultiColumn={true} onSelectAgent={setSelectedAgentId} />
+          <div className="xl:col-span-3 flex flex-col h-full overflow-hidden">
+            <LeaderboardControls 
+              isNightMode={isNightMode}
+              mode={leaderboardMode}
+              setMode={setLeaderboardMode}
+              timeframe={timeframe}
+              setTimeframe={setTimeframe}
+              dateRange={dateRange}
+              setDateRange={setDateRange}
+              availableTeams={availableTeams}
+              availableAgents={availableAgents}
+              availableSources={availableSources}
+              availableAgencies={availableAgencies}
+              selectedTeamsFilter={selectedTeamsFilter}
+              setSelectedTeamsFilter={setSelectedTeamsFilter}
+              selectedAgentsFilter={selectedAgentsFilter}
+              setSelectedAgentsFilter={setSelectedAgentsFilter}
+              selectedSourceFilter={selectedSourceFilter}
+              selectedSourceName={selectedSourceName}
+              setSelectedSourceFilter={(id) => { setSelectedSourceFilter(id); if (!id) setSelectedSourceName(undefined); }}
+              selectedAgencyFilter={selectedAgencyFilter}
+              setSelectedAgencyFilter={setSelectedAgencyFilter}
+            />
+            
+            <div className="flex-1 min-h-0">
+              {selectedAgentsFilter.length > 1 ? (
+                <AgentComparisonView 
+                  agents={displayData.filter(a => selectedAgentsFilter.includes(a.agent_id))} 
+                  isNightMode={isNightMode} 
+                  onClear={() => setSelectedAgentsFilter([])}
+                  onRemoveAgent={(id) => setSelectedAgentsFilter(prev => prev.filter(p => p !== id))}
+                />
+              ) : (
+                <LeaderboardList 
+                  title={`Global Rankings - ${leaderboardMode.toUpperCase()} (${timeframe.toUpperCase()})`} 
+                  icon={<Trophy className="w-4 h-4 fill-indigo-500" />} 
+                  data={selectedAgentsFilter.length === 1 ? displayData.filter(a => a.agent_id === selectedAgentsFilter[0]) : displayData} 
+                  loading={loading} 
+                  isNightMode={isNightMode} 
+                  accentColor="bg-indigo-50 text-indigo-600" 
+                  isMultiColumn={true} 
+                  onSelectAgent={(id) => {
+                     if (leaderboardMode === 'team') {
+                        setSelectedTeamsFilter([id]);
+                        setLeaderboardMode('agent');
+                     } else if (leaderboardMode === 'source') {
+                        const sourceName = unifiedData.find(d => d.agent_id === id)?.agent_name;
+                        setSelectedSourceFilter(id);
+                        setSelectedSourceName(sourceName);
+                        setLeaderboardMode('agent');
+                     } else {
+                        setSelectedAgentId(id);
+                     }
+                  }} 
+                />
+              )}
+            </div>
           </div>
 
           <div className="xl:col-span-1 flex flex-col h-full gap-6">
@@ -724,3 +866,8 @@ export const AgentleaderboardRealtime: React.FC = () => {
     </div>
   );
 };
+
+
+
+
+

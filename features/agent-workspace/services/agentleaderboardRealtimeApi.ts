@@ -135,6 +135,70 @@ export const agentleaderboardRealtimeApi = {
   },
 
   /**
+   * Leaderboard overhaul split into three endpoints for specialized querying on Xano.
+   */
+  getAgentLeaderboard: async (payload: {
+    timeframe: 'today' | 'weekly' | 'monthly' | 'yearly' | 'custom';
+    startDate?: string | null;
+    endDate?: string | null;
+    teamId?: string | null;
+    sourceId?: string | null;
+    agencyIds?: string[] | null;
+  }): Promise<any[]> => {
+    const url = `${BASE_URL}/arena/leaderboard/agents`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: authHeader(),
+      body: JSON.stringify(payload)
+    });
+    if (!response.ok) {
+      console.warn("Unified agent endpoint failed. Using mock data.");
+      return [];
+    }
+    return response.json();
+  },
+
+  getTeamLeaderboard: async (payload: {
+    timeframe: 'today' | 'weekly' | 'monthly' | 'yearly' | 'custom';
+    startDate?: string;
+    endDate?: string;
+    teamIds?: string[];
+    sourceId?: string;
+  }): Promise<any[]> => {
+    const url = `${BASE_URL}/arena/leaderboard/teams`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: authHeader(),
+      body: JSON.stringify(payload)
+    });
+    if (!response.ok) {
+      console.warn("Unified team endpoint failed. Using mock data.");
+      return [];
+    }
+    return response.json();
+  },
+
+  getSourceLeaderboard: async (payload: {
+    timeframe: 'today' | 'weekly' | 'monthly' | 'yearly' | 'custom';
+    startDate?: string;
+    endDate?: string;
+    sourceIds?: string[];
+    sourceId?: string;
+  }): Promise<any[]> => {
+    const url = `${BASE_URL}/arena/leaderboard/sources`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: authHeader(),
+      body: JSON.stringify(payload)
+    });
+    if (!response.ok) {
+      console.warn("Unified source endpoint failed. Using mock data.");
+      return [];
+    }
+    return response.json();
+  },
+
+  /**
    * Fetches the recent sales feed for the arena
    */
   getArenaFeed: async (sourceId?: string, teamId?: string): Promise<SaleRecord[]> => {
@@ -152,5 +216,6 @@ export const agentleaderboardRealtimeApi = {
 
     if (!response.ok) throw new ApiError('Failed to fetch arena feed', response.status);
     return response.json();
+
   }
 };
