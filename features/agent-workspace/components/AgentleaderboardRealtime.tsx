@@ -756,6 +756,9 @@ export const AgentleaderboardRealtime: React.FC = () => {
                   isNightMode={isNightMode} 
                   onClear={() => setSelectedAgentsFilter([])}
                   onRemoveAgent={(id) => setSelectedAgentsFilter(prev => prev.filter(p => p !== id))}
+                  todayData={todayData}
+                  mtdData={mtdData}
+                  arenaFeed={arenaFeed}
                 />
               ) : (
                 <LeaderboardList 

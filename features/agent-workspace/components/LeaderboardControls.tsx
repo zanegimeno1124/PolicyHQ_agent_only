@@ -95,7 +95,7 @@ const FilterDropdown = ({
       </button>
 
       {isOpen && (
-        <div className={`absolute top-full mt-2 w-full z-[100] rounded-2xl shadow-2xl border overflow-hidden ${
+        <div className={`absolute top-full mt-2 w-full z-[500] rounded-2xl shadow-2xl border overflow-hidden ${
           isNightMode ? 'bg-slate-900 border-white/10 text-white' : 'bg-white border-slate-200 text-slate-900'
         }`}>
           <div className={`p-2 border-b ${isNightMode ? 'border-white/10 bg-slate-900/50' : 'border-slate-100 bg-slate-50'}`}>
@@ -410,7 +410,7 @@ export const LeaderboardControls: React.FC<LeaderboardControlsProps> = ({
   };
 
   return (
-    <div className={`p-4 rounded-3xl shadow-sm mb-6 transition-colors border ${
+    <div className={`relative z-[50] p-4 rounded-3xl shadow-sm mb-6 transition-colors border ${
       isNightMode ? 'bg-slate-900/60 border-white/5 backdrop-blur-md' : 'bg-white border-slate-100'
     }`}>
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
