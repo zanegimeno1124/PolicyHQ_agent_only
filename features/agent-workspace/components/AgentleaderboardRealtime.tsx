@@ -582,11 +582,14 @@ export const AgentleaderboardRealtime: React.FC = () => {
     if (isInitial) setLoading(true);
     setRefreshing(true);
     try {
+      const activeTeamId = selectedTeamsFilter.length > 0 ? selectedTeamsFilter[0] : undefined;
+      const activeSourceId = selectedSourceFilter;
+
       const [todayRes, mtdRes, weekYearRes, feedRes] = await Promise.all([
-        agentleaderboardRealtimeApi.getRealtimeLeaderboard(null, sourceId, teamId),
-        agentleaderboardRealtimeApi.getMTDLeaderboard(sourceId, teamId),
-        agentleaderboardRealtimeApi.getWeekYearStats(sourceId, teamId),
-        agentleaderboardRealtimeApi.getArenaFeed(sourceId, teamId)
+        agentleaderboardRealtimeApi.getRealtimeLeaderboard(null, activeSourceId, activeTeamId),
+        agentleaderboardRealtimeApi.getMTDLeaderboard(activeSourceId, activeTeamId),
+        agentleaderboardRealtimeApi.getWeekYearStats(activeSourceId, activeTeamId),
+        agentleaderboardRealtimeApi.getArenaFeed(activeSourceId, activeTeamId)
       ]);
 
       setTodayData(todayRes.today_rundown || []);
