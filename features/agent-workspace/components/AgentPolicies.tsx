@@ -1023,27 +1023,27 @@ export const AgentPolicies: React.FC = () => {
       </div>
 
       {/* DASHBOARD GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="flex flex-col gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-1 md:flex md:flex-col gap-3">
               <button 
                   onClick={() => toggleFilter('GROUP_APPROVED')}
-                  className={`flex-1 p-6 rounded-[2.5rem] flex flex-col justify-between relative overflow-hidden transition-all text-left group
+                  className={`flex-1 p-4 rounded-2xl flex flex-col justify-between relative overflow-hidden transition-all text-left group
                       ${activeStatusFilter === 'GROUP_APPROVED' 
                           ? 'bg-emerald-500 text-white shadow-xl shadow-emerald-500/30 scale-[1.02]' 
                           : 'bg-white border border-slate-100 hover:shadow-lg hover:shadow-emerald-500/10 hover:border-emerald-100'
                       }`}
               >
-                  <div className="flex justify-between items-start mb-6">
-                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${activeStatusFilter === 'GROUP_APPROVED' ? 'bg-white/20 text-white' : 'bg-emerald-50 text-emerald-500'}`}>
-                          <CheckCircle className="w-6 h-6" strokeWidth={2.5} />
+                  <div className="flex justify-between items-start mb-3">
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${activeStatusFilter === 'GROUP_APPROVED' ? 'bg-white/20 text-white' : 'bg-emerald-50 text-emerald-500'}`}>
+                          <CheckCircle className="w-5 h-5" strokeWidth={2.5} />
                       </div>
-                      <ArrowUpRight className={`w-5 h-5 ${activeStatusFilter === 'GROUP_APPROVED' ? 'text-white/70' : 'text-slate-300'}`} />
+                      <ArrowUpRight className={`w-4 h-4 ${activeStatusFilter === 'GROUP_APPROVED' ? 'text-white/70' : 'text-slate-300'}`} />
                   </div>
                   <div>
-                        <h3 className={`text-3xl font-extrabold mb-1 ${activeStatusFilter === 'GROUP_APPROVED' ? 'text-white' : 'text-slate-900'}`}>${approvedPremium.toLocaleString('en-US', { notation: 'compact' })}</h3>
+                        <h3 className={`text-xl font-extrabold mb-0.5 ${activeStatusFilter === 'GROUP_APPROVED' ? 'text-white' : 'text-slate-900'}`}>${approvedPremium.toLocaleString('en-US', { notation: 'compact' })}</h3>
                         <div className="flex items-center justify-between">
-                          <p className={`text-xs font-bold uppercase tracking-wider ${activeStatusFilter === 'GROUP_APPROVED' ? 'text-emerald-100' : 'text-slate-400'}`}>Approved</p>
-                          <span className={`text-xs font-bold px-2 py-1 rounded-lg ${activeStatusFilter === 'GROUP_APPROVED' ? 'bg-white text-emerald-600' : 'bg-slate-100 text-slate-600'}`}>
+                          <p className={`text-[10px] font-bold uppercase tracking-wider ${activeStatusFilter === 'GROUP_APPROVED' ? 'text-emerald-100' : 'text-slate-400'}`}>Approved</p>
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-lg ${activeStatusFilter === 'GROUP_APPROVED' ? 'bg-white text-emerald-600' : 'bg-slate-100 text-slate-600'}`}>
                               {approvedPolicies.length}
                           </span>
                         </div>
@@ -1052,23 +1052,23 @@ export const AgentPolicies: React.FC = () => {
 
               <button 
                   onClick={() => toggleFilter('Underwriting')}
-                  className={`flex-1 p-6 rounded-[2.5rem] flex flex-col justify-between relative overflow-hidden transition-all text-left group
+                  className={`flex-1 p-4 rounded-2xl flex flex-col justify-between relative overflow-hidden transition-all text-left group
                       ${activeStatusFilter === 'Underwriting' 
                           ? 'bg-blue-500 text-white shadow-xl shadow-blue-500/30 scale-[1.02]' 
                           : 'bg-white border border-slate-100 hover:shadow-lg hover:shadow-blue-500/10 hover:border-blue-100'
                       }`}
               >
-                  <div className="flex justify-between items-start mb-6">
-                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${activeStatusFilter === 'Underwriting' ? 'bg-white/20 text-white' : 'bg-blue-50 text-blue-500'}`}>
-                          <Clock className="w-6 h-6" strokeWidth={2.5} />
+                  <div className="flex justify-between items-start mb-3">
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${activeStatusFilter === 'Underwriting' ? 'bg-white/20 text-white' : 'bg-blue-50 text-blue-500'}`}>
+                          <Clock className="w-5 h-5" strokeWidth={2.5} />
                       </div>
-                      <ArrowUpRight className={`w-5 h-5 ${activeStatusFilter === 'Underwriting' ? 'text-white/70' : 'text-slate-300'}`} />
+                      <ArrowUpRight className={`w-4 h-4 ${activeStatusFilter === 'Underwriting' ? 'text-white/70' : 'text-slate-300'}`} />
                   </div>
                   <div>
-                        <h3 className={`text-3xl font-extrabold mb-1 ${activeStatusFilter === 'Underwriting' ? 'text-white' : 'text-slate-900'}`}>${underwritingPremium.toLocaleString('en-US', { notation: 'compact' })}</h3>
+                        <h3 className={`text-xl font-extrabold mb-0.5 ${activeStatusFilter === 'Underwriting' ? 'text-white' : 'text-slate-900'}`}>${underwritingPremium.toLocaleString('en-US', { notation: 'compact' })}</h3>
                         <div className="flex items-center justify-between">
-                          <p className={`text-xs font-bold uppercase tracking-wider ${activeStatusFilter === 'Underwriting' ? 'text-blue-100' : 'text-slate-400'}`}>Underwriting</p>
-                          <span className={`text-xs font-bold px-2 py-1 rounded-lg ${activeStatusFilter === 'Underwriting' ? 'bg-white text-blue-600' : 'bg-slate-100 text-slate-600'}`}>
+                          <p className={`text-[10px] font-bold uppercase tracking-wider ${activeStatusFilter === 'Underwriting' ? 'text-blue-100' : 'text-slate-400'}`}>Underwriting</p>
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-lg ${activeStatusFilter === 'Underwriting' ? 'bg-white text-blue-600' : 'bg-slate-100 text-slate-600'}`}>
                               {underwritingPolicies.length}
                           </span>
                         </div>
@@ -1076,23 +1076,23 @@ export const AgentPolicies: React.FC = () => {
               </button>
           </div>
 
-          <div className="md:col-span-2 bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl shadow-slate-900/30 group">
+          <div className="md:col-span-2 bg-slate-900 rounded-[2rem] p-5 text-white relative overflow-hidden shadow-2xl shadow-slate-900/30 group">
               <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-brand-500/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
               
               <div className="relative z-10 flex flex-col h-full justify-between">
-                  <div className="flex justify-between items-start mb-6">
+                  <div className="flex justify-between items-start mb-3">
                       <div>
-                          <p className="text-slate-400 font-bold text-xs uppercase tracking-widest mb-2 flex items-center gap-2">
+                          <p className="text-slate-400 font-bold text-xs uppercase tracking-widest mb-1 flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
                             Total Production
                           </p>
-                          <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-white mt-2">
+                          <h2 className="text-3xl font-black tracking-tighter text-white">
                             ${totalPremium.toLocaleString('en-US', { minimumFractionDigits: 0 })}
                           </h2>
                       </div>
                   </div>
                   
-                  <div className="flex-1 min-h-[180px] w-full">
+                  <div className="flex-1 min-h-[110px] w-full">
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={SPARKLINE_DATA}>
                             <defs>
@@ -1119,20 +1119,20 @@ export const AgentPolicies: React.FC = () => {
               </div>
           </div>
 
-          <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-[0_4px_30px_-4px_rgba(0,0,0,0.02)] flex flex-col relative overflow-hidden group hover:shadow-lg transition-all">
+          <div className="bg-white rounded-[2rem] p-5 border border-slate-100 shadow-[0_4px_30px_-4px_rgba(0,0,0,0.02)] flex flex-col relative overflow-hidden group hover:shadow-lg transition-all">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 to-blue-500"></div>
               
-              <div className="flex items-center gap-4 mb-4 relative z-10">
-                  <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-600">
-                      <PieChartIcon className="w-6 h-6" strokeWidth={2.5} />
+              <div className="flex items-center gap-3 mb-3 relative z-10">
+                  <div className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600">
+                      <PieChartIcon className="w-5 h-5" strokeWidth={2.5} />
                   </div>
                   <div>
-                      <h3 className="font-bold text-slate-900 text-lg">Carrier Mix</h3>
-                      <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Distribution</p>
+                      <h3 className="font-bold text-slate-900 text-sm">Carrier Mix</h3>
+                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Distribution</p>
                   </div>
               </div>
               
-              <div className="flex-1 min-h-[200px] w-full relative z-10">
+              <div className="flex-1 min-h-[140px] w-full relative z-10">
                   <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                           <Pie
@@ -1164,26 +1164,26 @@ export const AgentPolicies: React.FC = () => {
       </div>
 
       {totalActionCount > 0 && (
-          <div className="relative rounded-[2.5rem] bg-gradient-to-r from-red-500 to-pink-600 shadow-xl shadow-red-500/20 overflow-hidden group">
+          <div className="relative rounded-2xl bg-gradient-to-r from-red-500 to-pink-600 shadow-lg shadow-red-500/20 overflow-hidden group">
               <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 mix-blend-overlay"></div>
-              <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-6 p-6 md:p-8 text-white">
-                  <div className="flex items-center gap-4 shrink-0">
-                      <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30 animate-pulse">
-                          <AlertTriangle className="w-7 h-7" />
+              <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-4 p-4 md:p-5 text-white">
+                  <div className="flex items-center gap-3 shrink-0">
+                      <div className="w-9 h-9 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/30 animate-pulse">
+                          <AlertTriangle className="w-4 h-4" />
                       </div>
                       <div>
-                          <h3 className="text-lg font-extrabold tracking-tight">Attention Required</h3>
-                          <p className="text-white/80 text-sm font-medium">{totalActionCount} policies need your immediate action</p>
+                          <h3 className="text-sm font-extrabold tracking-tight">Attention Required</h3>
+                          <p className="text-white/80 text-[11px] font-medium">{totalActionCount} policies need your immediate action</p>
                       </div>
                   </div>
-                  <div className="hidden md:block w-px h-12 bg-white/20 mx-4"></div>
-                  <div className="flex flex-wrap gap-3 flex-1">
+                  <div className="hidden md:block w-px h-8 bg-white/20 mx-2"></div>
+                  <div className="flex flex-wrap gap-2 flex-1">
                       {Object.entries(actionItems.counts).map(([status, count]) => (
                           <button
                               key={status}
                               onClick={() => toggleFilter(status)}
                               className={`
-                                  flex items-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-bold transition-all backdrop-blur-sm
+                                  flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[10px] font-bold transition-all backdrop-blur-sm
                                   ${activeStatusFilter === status 
                                       ? 'bg-white text-red-600 border-white shadow-lg scale-105' 
                                       : 'bg-white/10 text-white border-white/20 hover:bg-white/20 hover:border-white/40'
@@ -1192,7 +1192,7 @@ export const AgentPolicies: React.FC = () => {
                           >
                               {getActionIcon(status)}
                               <span>{status}</span>
-                              <span className={`px-2 py-0.5 rounded-lg text-[10px] ${activeStatusFilter === status ? 'bg-red-100 text-red-600' : 'bg-white/20 text-white'} font-black`}>
+                              <span className={`px-1.5 py-0.5 rounded-lg text-[9px] ${activeStatusFilter === status ? 'bg-red-100 text-red-600' : 'bg-white/20 text-white'} font-black`}>
                                   {count}
                               </span>
                           </button>
