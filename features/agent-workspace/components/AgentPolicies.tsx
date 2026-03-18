@@ -625,6 +625,7 @@ export const AgentPolicies: React.FC = () => {
   const [activeStatusFilter, setActiveStatusFilter] = useState<string | 'GROUP_APPROVED' | 'GROUP_PENDING' | 'Underwriting' | null>(savedState?.activeStatusFilter || null);
   const [searchTerm, setSearchTerm] = useState(savedState?.searchTerm || '');
   const [selectedCarriers, setSelectedCarriers] = useState<string[]>(savedState?.selectedCarriers || []);
+  const [selectedSources, setSelectedSources] = useState<string[]>(savedState?.selectedSources || []);
   const [selectedPaidStatus, setSelectedPaidStatus] = useState<string[]>(savedState?.selectedPaidStatus || []);
   const [effectiveDateRange, setEffectiveDateRange] = useState<DateRange | null>(savedState?.effectiveDateRange || null);
 
@@ -643,6 +644,7 @@ export const AgentPolicies: React.FC = () => {
         activeStatusFilter,
         searchTerm,
         selectedCarriers,
+        selectedSources,
         selectedPaidStatus,
         effectiveDateRange,
         sortConfig,
@@ -652,7 +654,7 @@ export const AgentPolicies: React.FC = () => {
     sessionStorage.setItem(storageKey, JSON.stringify(state));
   }, [
     currentAgentId, activeTab, dateRange, activeStatusFilter, searchTerm, 
-    selectedCarriers, selectedPaidStatus, effectiveDateRange, sortConfig, 
+    selectedCarriers, selectedSources, selectedPaidStatus, effectiveDateRange, sortConfig, 
     currentPage, rowsPerPage
   ]);
 
@@ -668,6 +670,7 @@ export const AgentPolicies: React.FC = () => {
             setActiveStatusFilter(newState.activeStatusFilter);
             setSearchTerm(newState.searchTerm);
             setSelectedCarriers(newState.selectedCarriers);
+            setSelectedSources(newState.selectedSources);
             setSelectedPaidStatus(newState.selectedPaidStatus);
             setEffectiveDateRange(newState.effectiveDateRange);
             setSortConfig(newState.sortConfig);
@@ -679,6 +682,7 @@ export const AgentPolicies: React.FC = () => {
             setDateRange(defaultDateRange);
             setActiveStatusFilter(null);
             setSearchTerm('');
+            setSelectedSources([]);
             setSelectedCarriers([]);
             setSelectedPaidStatus([]);
             setEffectiveDateRange(null);
@@ -714,6 +718,12 @@ export const AgentPolicies: React.FC = () => {
       return Array.from(unique).sort();
   }, [policies]);
 
+  // Derived Data: Sources
+  const sources = useMemo(() => {
+      const unique = new Set(policies.map(p => p.source_name).filter(Boolean));
+      return Array.from(unique).sort() as string[];
+  }, [policies]);
+
   // --- PROCESSING DATA ---
   const processTableData = useMemo(() => {
       let data = [...policies];
@@ -725,7 +735,8 @@ export const AgentPolicies: React.FC = () => {
               p.client.toLowerCase().includes(lower) ||
               (p.policy_number && p.policy_number.toLowerCase().includes(lower)) ||
               p.carrier.toLowerCase().includes(lower) ||
-              p.agent_name.toLowerCase().includes(lower)
+              p.agent_name.toLowerCase().includes(lower) ||
+              (p.source_name && p.source_name.toLowerCase().includes(lower))
           );
       }
 
@@ -748,6 +759,11 @@ export const AgentPolicies: React.FC = () => {
       // 4. Carrier Filter
       if (selectedCarriers.length > 0) {
           data = data.filter(p => selectedCarriers.includes(p.carrier));
+      }
+
+      // 4.5. Source Filter
+      if (selectedSources.length > 0) {
+          data = data.filter(p => p.source_name && selectedSources.includes(p.source_name));
       }
 
       // 5. Paid Status Filter
@@ -780,7 +796,7 @@ export const AgentPolicies: React.FC = () => {
       }
 
       return data;
-  }, [policies, searchTerm, activeTab, activeStatusFilter, selectedCarriers, selectedPaidStatus, effectiveDateRange, sortConfig]);
+  }, [policies, searchTerm, activeTab, activeStatusFilter, selectedCarriers, selectedSources, selectedPaidStatus, effectiveDateRange, sortConfig]);
 
   // Pagination
   const totalPages = Math.ceil(processTableData.length / rowsPerPage);
@@ -1243,6 +1259,15 @@ export const AgentPolicies: React.FC = () => {
 
                   <div className="w-full sm:w-[160px]">
                       <MultiSelectDropdown 
+                          label="Sources" 
+                          options={sources} 
+                          selected={selectedSources} 
+                          onChange={setSelectedSources} 
+                      />
+                  </div>
+
+                  <div className="w-full sm:w-[160px]">
+                      <MultiSelectDropdown 
                           label="Paid Status" 
                           options={['Paid', 'Unpaid']} 
                           selected={selectedPaidStatus} 
@@ -1259,11 +1284,12 @@ export const AgentPolicies: React.FC = () => {
                       />
                   </div>
                   
-                  {(activeStatusFilter || selectedCarriers.length > 0 || selectedPaidStatus.length > 0 || effectiveDateRange || searchTerm) && (
+                  {(activeStatusFilter || selectedCarriers.length > 0 || selectedSources.length > 0 || selectedPaidStatus.length > 0 || effectiveDateRange || searchTerm) && (
                       <button 
                           onClick={() => {
                               setActiveStatusFilter(null);
                               setSelectedCarriers([]);
+                              setSelectedSources([]);
                               setSelectedPaidStatus([]);
                               setEffectiveDateRange(null);
                               setSearchTerm('');
@@ -1332,6 +1358,9 @@ export const AgentPolicies: React.FC = () => {
                     <th className="py-5 px-4 text-[10px] font-bold uppercase tracking-widest text-slate-400 cursor-pointer hover:text-brand-500 group" onClick={() => handleSort('agent_name')}>
                         <div className="flex items-center gap-1">Agent <ArrowUpDown className={`w-3 h-3 ${sortConfig?.key === 'agent_name' ? 'text-brand-500' : 'text-slate-300 group-hover:text-brand-300'}`} /></div>
                     </th>
+                    <th className="py-5 px-4 text-[10px] font-bold uppercase tracking-widest text-slate-400 cursor-pointer hover:text-brand-500 group" onClick={() => handleSort('source_name')}>
+                        <div className="flex items-center gap-1">Source <ArrowUpDown className={`w-3 h-3 ${sortConfig?.key === 'source_name' ? 'text-brand-500' : 'text-slate-300 group-hover:text-brand-300'}`} /></div>
+                    </th>
                     <th className="py-5 px-4 text-[10px] font-bold uppercase tracking-widest text-slate-400 cursor-pointer hover:text-brand-500 group" onClick={() => handleSort('policy_number')}>
                         <div className="flex items-center gap-1">Policy No. <ArrowUpDown className={`w-3 h-3 ${sortConfig?.key === 'policy_number' ? 'text-brand-500' : 'text-slate-300 group-hover:text-brand-300'}`} /></div>
                     </th>
@@ -1353,7 +1382,7 @@ export const AgentPolicies: React.FC = () => {
                 <tbody className="divide-y divide-slate-50">
                     {loadingPolicies ? (
                     <tr>
-                        <td colSpan={9} className="py-12 text-center">
+                        <td colSpan={100} className="py-12 text-center">
                         <div className="flex items-center justify-center gap-3 text-slate-400">
                             <Loader2 className="w-6 h-6 animate-spin" />
                             <span className="text-sm font-medium">Loading policies...</span>
@@ -1391,6 +1420,11 @@ export const AgentPolicies: React.FC = () => {
                                 </div>
                                 <span className="text-xs font-bold text-slate-700">{policy.agent_name || 'Unknown'}</span>
                             </div>
+                        </td>
+                        <td className="py-5 px-4">
+                            <span className="text-xs font-medium text-slate-600">
+                                {policy.source_name || '-'}
+                            </span>
                         </td>
                         <td className="py-5 px-4">
                             <div className="flex items-center gap-1.5">

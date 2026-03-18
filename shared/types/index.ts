@@ -52,6 +52,7 @@ export interface Policy {
   isLocked: boolean;
   agent_id: string;
   agent_name: string;
+  source_name?: string;
   created_at: number; // timestamp
   paid_status?: string | null;
 }
