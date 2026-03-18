@@ -15,7 +15,8 @@ import {
   RotateCcw, 
   Users, 
   Ticket,
-  Trophy
+  Trophy,
+  Check // Imported Check
 } from 'lucide-react';
 import { useAgentContext } from './context/AgentContext';
 import { useAuth } from '../../context/AuthContext';
@@ -93,13 +94,17 @@ const SidebarItem = ({
 const AgentLayout: React.FC = () => {
   const { user, logout } = useAuth();
   const { 
-    isImpersonating, 
     currentAgentId, 
-    stopImpersonation, 
+    selectedAgentIds,
+    isImpersonating, 
     startImpersonation, 
-    subAgents, 
-    viewingAgentName, 
-    availableFeatures 
+    stopImpersonation, 
+    toggleAgentSelection,
+    selectAllAgents,
+    availableFeatures,
+    subAgents,
+    viewingAgentName,
+    hasAgentProfile
   } = useAgentContext();
   const location = useLocation();
   const navigate = useNavigate();
@@ -131,9 +136,7 @@ const AgentLayout: React.FC = () => {
 
   const isRestricted = featureKey && isLocked(featureKey);
 
-  const currentSelectionLabel = isImpersonating 
-    ? subAgents.find(a => a.agentId === currentAgentId)?.name 
-    : 'My Workspace';
+  const currentSelectionLabel = viewingAgentName;
 
   // Extract agency initials for fallback logo
   const agencyInitials = user?.agencyName
@@ -211,21 +214,26 @@ const AgentLayout: React.FC = () => {
                       
                       {subAgents.length > 0 && (
                         <>
-                          <div className="px-5 py-3 mt-1 text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Team Access</div>
+                          <div className="px-5 py-3 mt-1 flex items-center justify-between">
+                             <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Team Access</div>
+                             <button onClick={selectAllAgents} className="text-[10px] font-bold text-brand-500 hover:text-brand-600 uppercase">Select All</button>
+                          </div>
                           <div className="max-h-60 overflow-y-auto pr-1">
                             {subAgents.map(agent => {
-                              const isSelected = isImpersonating && currentAgentId === agent.agentId;
+                              const isSelected = selectedAgentIds.includes(agent.agentId) && isImpersonating;
                               return (
                                 <button
                                   key={agent.agentId}
-                                  onClick={() => {
-                                    startImpersonation(agent.agentId);
-                                    setIsDropdownOpen(false);
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    toggleAgentSelection(agent.agentId);
                                   }}
                                   className={`w-full text-left px-5 py-3 rounded-2xl text-sm font-bold transition-all flex items-center justify-between mb-1 ${isSelected ? 'bg-amber-50 text-amber-900 border border-amber-100' : 'text-slate-600 hover:bg-slate-50'}`}
                                 >
                                   <span className="truncate">{agent.name}</span>
-                                  {isSelected && <div className="w-2 h-2 rounded-full bg-amber-500" />}
+                                  <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${isSelected ? 'bg-amber-500 border-amber-500' : 'border-slate-300'}`}>
+                                    {isSelected && <Check className="w-3 h-3 text-white" />}
+                                  </div>
                                 </button>
                               );
                             })}

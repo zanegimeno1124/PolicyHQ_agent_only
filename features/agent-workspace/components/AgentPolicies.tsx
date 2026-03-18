@@ -593,7 +593,7 @@ type SortConfig = {
 };
 
 export const AgentPolicies: React.FC = () => {
-  const { currentAgentId, viewingAgentName, hasAgentProfile } = useAgentContext();
+  const { currentAgentId, selectedAgentIds, subAgents, viewingAgentName, hasAgentProfile, checkAgentFeature } = useAgentContext();
   const navigate = useNavigate();
 
   // --- STATE PERSISTENCE LOGIC ---
@@ -637,7 +637,7 @@ export const AgentPolicies: React.FC = () => {
 
   // Save state on change
   useEffect(() => {
-    if (!currentAgentId) return;
+    if (!selectedAgentIds || selectedAgentIds.length === 0) return;
     const state = {
         activeTab,
         dateRange,
@@ -653,16 +653,17 @@ export const AgentPolicies: React.FC = () => {
     };
     sessionStorage.setItem(storageKey, JSON.stringify(state));
   }, [
-    currentAgentId, activeTab, dateRange, activeStatusFilter, searchTerm, 
+    selectedAgentIds, activeTab, dateRange, activeStatusFilter, searchTerm, 
     selectedCarriers, selectedSources, selectedPaidStatus, effectiveDateRange, sortConfig, 
     currentPage, rowsPerPage
   ]);
 
   // Restore or Reset on Agent Change
-  const prevAgentId = useRef(currentAgentId);
+  const prevAgentIdsString = useRef(selectedAgentIds.sort().join(','));
   
   useEffect(() => {
-    if (prevAgentId.current !== currentAgentId) {
+    const currentAgentIdsString = selectedAgentIds.sort().join(',');
+    if (prevAgentIdsString.current !== currentAgentIdsString) {
         const newState = getSavedState();
         if (newState) {
             setActiveTab(newState.activeTab);
@@ -690,27 +691,41 @@ export const AgentPolicies: React.FC = () => {
             setCurrentPage(1);
             setRowsPerPage(10);
         }
-        prevAgentId.current = currentAgentId;
+        prevAgentIdsString.current = currentAgentIdsString;
     }
-  }, [currentAgentId]);
+  }, [selectedAgentIds]);
 
-  // Load Policies
-  const fetchPolicies = () => {
-    if (currentAgentId) {
+  const fetchPolicies = async () => {
+    if (selectedAgentIds && selectedAgentIds.length > 0) {
       setLoadingPolicies(true);
-      agentPoliciesApi.getPolicies(currentAgentId, dateRange.start, dateRange.end)
-        .then(data => {
-            setPolicies(data);
-            setSelectedPolicyIds(new Set()); // Reset selection on new fetch
-        })
-        .catch(err => console.error("Failed to load policies", err))
-        .finally(() => setLoadingPolicies(false));
+      
+      try {
+        const fetchPromises = selectedAgentIds
+          .filter(agentId => checkAgentFeature(agentId, 'policies'))
+          .map(agentId => 
+            agentPoliciesApi.getPolicies(agentId, dateRange.start, dateRange.end)
+              .catch(err => {
+                console.error(`Failed to load policies for agent ${agentId}`, err);
+                return []; // return empty array on failure so Promise.all succeeds
+              })
+          );
+          
+        const results = await Promise.all(fetchPromises);
+        const mergedData = results.flat();
+        
+        setPolicies(mergedData);
+        setSelectedPolicyIds(new Set()); // Reset selection on new fetch
+      } catch (err) {
+        console.error("Failed to load policies", err);
+      } finally {
+        setLoadingPolicies(false);
+      }
     }
   };
 
   useEffect(() => {
     fetchPolicies();
-  }, [currentAgentId, dateRange]);
+  }, [selectedAgentIds, dateRange]);
 
   // Derived Data: Carriers
   const carriers = useMemo(() => {
