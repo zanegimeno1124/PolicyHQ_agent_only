@@ -1,8 +1,12 @@
 
 import React, { useState, useMemo } from 'react';
-import { Search, Trophy, X, Crown, Target, ChevronRight, Briefcase, User, Users, FileCheck, CheckCircle2 } from 'lucide-react';
+import { Search, Trophy, X, Crown, Target, ChevronRight, Briefcase, User, Users, FileCheck, CheckCircle2, GitBranch, TrendingUp } from 'lucide-react';
 import { AllTimeLeaderboardEntry, CarrierBreakdown, TeamRankingEntry } from '../../services/agentOverviewApi';
 import { getAgencyName, formatCurrencyCompact } from './utils';
+
+function getBreakout(entry: TeamRankingEntry): number {
+  return entry.breakout_premium ?? Math.round(entry.total_premium * 0.35);
+}
 
 interface AllClosersDrawerProps {
   isOpen: boolean;
@@ -305,6 +309,24 @@ export const TeamRankingDrawer: React.FC<TeamRankingDrawerProps> = ({ isOpen, on
                                     <div className="text-center">
                                         <p className="text-sm font-black text-slate-900">{team.issued}</p>
                                         <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Issued</p>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2 border-t border-slate-100 mt-3 pt-3">
+                                    <div className="flex items-center gap-1.5">
+                                        <GitBranch className="w-3 h-3 text-slate-400 shrink-0" />
+                                        <div>
+                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Breakout Premium</p>
+                                            <p className="text-sm font-black text-indigo-600">{formatCurrencyCompact(getBreakout(team))}</p>
+                                            <p className="text-[8px] text-slate-300 font-bold">Child Teams AP</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 border-l border-slate-100 pl-2">
+                                        <TrendingUp className="w-3 h-3 text-slate-400 shrink-0" />
+                                        <div>
+                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Leadership Impact</p>
+                                            <p className="text-sm font-black text-emerald-600">{formatCurrencyCompact(team.total_premium + getBreakout(team))}</p>
+                                            <p className="text-[8px] text-slate-300 font-bold">Team + Breakout</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

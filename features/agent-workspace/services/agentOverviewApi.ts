@@ -53,6 +53,8 @@ export interface TeamRankingEntry {
   submissions: number;
   issued: number;
   total_premium: number;
+  breakout_premium?: number;
+  direct_leg?: { id: string; name: string }[];
 }
 
 export interface LeadBreakdownItem {

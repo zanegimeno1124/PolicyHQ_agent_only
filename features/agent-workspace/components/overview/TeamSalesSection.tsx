@@ -1,8 +1,13 @@
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, ChevronDown, Star, Crown, Loader2, Users, FileCheck, CheckCircle2, Sparkles, TrendingUp, ArrowRight } from 'lucide-react';
+import { Trophy, ChevronDown, Star, Crown, Loader2, Users, FileCheck, CheckCircle2, Sparkles, TrendingUp, ArrowRight, GitBranch } from 'lucide-react';
 import { TeamRankingEntry } from '../../services/agentOverviewApi';
 import { formatCurrencyCompact } from './utils';
+
+// Returns breakout premium — uses real API value when present, falls back to mock (35% of team premium)
+function getBreakout(entry: TeamRankingEntry): number {
+  return entry.breakout_premium ?? Math.round(entry.total_premium * 0.35);
+}
 
 interface TeamSalesSectionProps {
   teamRankingData: TeamRankingEntry[];
@@ -208,20 +213,42 @@ export const TeamSalesSection: React.FC<TeamSalesSectionProps> = ({
           </div>
 
           {featuredEntry && (
-            <div className="grid grid-cols-3 gap-2 w-full mt-8 pt-6 border-t border-black/10 relative z-10">
-              <div className="p-2 text-center">
-                 <p className="text-[9px] font-black text-black/40 uppercase tracking-widest mb-1">Agents</p>
-                 <p className="text-sm font-black text-slate-900">{featuredEntry.agents}</p>
+            <>
+              <div className="grid grid-cols-3 gap-2 w-full mt-8 pt-6 border-t border-black/10 relative z-10">
+                <div className="p-2 text-center">
+                   <p className="text-[9px] font-black text-black/40 uppercase tracking-widest mb-1">Agents</p>
+                   <p className="text-sm font-black text-slate-900">{featuredEntry.agents}</p>
+                </div>
+                <div className="p-2 text-center border-x border-black/10">
+                   <p className="text-[9px] font-black text-black/40 uppercase tracking-widest mb-1">Subs</p>
+                   <p className="text-sm font-black text-slate-900">{featuredEntry.submissions}</p>
+                </div>
+                <div className="p-2 text-center">
+                   <p className="text-[9px] font-black text-black/40 uppercase tracking-widest mb-1">Issued</p>
+                   <p className="text-sm font-black text-slate-900">{featuredEntry.issued}</p>
+                </div>
               </div>
-              <div className="p-2 text-center border-x border-black/10">
-                 <p className="text-[9px] font-black text-black/40 uppercase tracking-widest mb-1">Subs</p>
-                 <p className="text-sm font-black text-slate-900">{featuredEntry.submissions}</p>
+
+              {/* Breakout Premium & Leadership Impact row */}
+              <div className="grid grid-cols-2 gap-2 w-full mt-2 pt-4 border-t border-black/10 relative z-10">
+                <div className="p-2 text-center">
+                  <div className="flex items-center justify-center gap-1 mb-1">
+                    <GitBranch className="w-2.5 h-2.5 text-black/30" />
+                    <p className="text-[9px] font-black text-black/40 uppercase tracking-widest">Breakout Premium</p>
+                  </div>
+                  <p className="text-sm font-black text-indigo-900">{formatCurrencyCompact(getBreakout(featuredEntry))}</p>
+                  <p className="text-[8px] text-black/20 font-bold mt-0.5">Child Teams AP</p>
+                </div>
+                <div className="p-2 text-center border-l border-black/10">
+                  <div className="flex items-center justify-center gap-1 mb-1">
+                    <TrendingUp className="w-2.5 h-2.5 text-black/30" />
+                    <p className="text-[9px] font-black text-black/40 uppercase tracking-widest">Leadership Impact</p>
+                  </div>
+                  <p className="text-sm font-black text-emerald-900">{formatCurrencyCompact(featuredEntry.total_premium + getBreakout(featuredEntry))}</p>
+                  <p className="text-[8px] text-black/20 font-bold mt-0.5">Team + Breakout</p>
+                </div>
               </div>
-              <div className="p-2 text-center">
-                 <p className="text-[9px] font-black text-black/40 uppercase tracking-widest mb-1">Issued</p>
-                 <p className="text-sm font-black text-slate-900">{featuredEntry.issued}</p>
-              </div>
-            </div>
+            </>
           )}
         </div>
       </div>
@@ -296,6 +323,14 @@ export const TeamSalesSection: React.FC<TeamSalesSectionProps> = ({
                         {formatCurrencyCompact(entry.total_premium)}
                       </p>
                       <p className="text-[9px] font-extrabold text-slate-300 uppercase tracking-widest">Premium</p>
+                      <div className="flex flex-col gap-0.5 mt-1.5 pt-1.5 border-t border-slate-100">
+                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                          Breakout: <span className="text-indigo-500">{formatCurrencyCompact(getBreakout(entry))}</span>
+                        </p>
+                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                          Impact: <span className="text-emerald-500">{formatCurrencyCompact(entry.total_premium + getBreakout(entry))}</span>
+                        </p>
+                      </div>
                     </div>
                     <ArrowRight className="w-4 h-4 text-indigo-400 opacity-0 -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all duration-200" />
                   </div>
