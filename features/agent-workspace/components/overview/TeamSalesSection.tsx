@@ -191,14 +191,14 @@ export const TeamSalesSection: React.FC<TeamSalesSectionProps> = ({
           <div className="text-center relative z-10 w-full px-2">
             <h4 
                 className={`text-2xl font-black text-slate-900 tracking-tight mb-4 drop-shadow-sm ${featuredEntry ? 'cursor-pointer hover:text-indigo-600 transition-colors' : ''}`}
-                onClick={() => featuredEntry && navigate(`/leaderboard/realtime?teamId=${featuredEntry.id}&timeframe=${tf}${dateParams}`)}
+                onClick={() => featuredEntry && navigate(`/agency/${featuredEntry.id}`, { state: { team: featuredEntry, allTeams: sortedData } })}
             >
               {featuredEntry?.name || 'Syncing Standings...'}
             </h4>
             
             <div 
                 className={`inline-flex flex-col items-center w-full max-w-[240px] px-6 py-4 bg-white/95 backdrop-blur-xl border border-white rounded-[2rem] shadow-[0_15px_40px_-10px_rgba(0,0,0,0.15)] group/val transition-transform hover:scale-105 ${featuredEntry ? 'cursor-pointer' : ''}`}
-                onClick={() => featuredEntry && navigate(`/leaderboard/realtime?teamId=${featuredEntry.id}&timeframe=${tf}${dateParams}`)}
+                onClick={() => featuredEntry && navigate(`/agency/${featuredEntry.id}`, { state: { team: featuredEntry, allTeams: sortedData } })}
             >
               <span className="text-[9px] font-black text-amber-600 uppercase tracking-[0.25em] mb-1">Production Value</span>
               <div className="flex items-center gap-3">
@@ -220,7 +220,7 @@ export const TeamSalesSection: React.FC<TeamSalesSectionProps> = ({
                    <p className="text-sm font-black text-slate-900">{featuredEntry.agents}</p>
                 </div>
                 <div className="p-2 text-center border-x border-black/10">
-                   <p className="text-[9px] font-black text-black/40 uppercase tracking-widest mb-1">Subs</p>
+                   <p className="text-[9px] font-black text-black/40 uppercase tracking-widest mb-1">Apps</p>
                    <p className="text-sm font-black text-slate-900">{featuredEntry.submissions}</p>
                 </div>
                 <div className="p-2 text-center">
@@ -269,7 +269,7 @@ export const TeamSalesSection: React.FC<TeamSalesSectionProps> = ({
                 <div 
                   key={entry.id} 
                   className="flex items-center justify-between group/item cursor-pointer hover:bg-slate-50 p-2 -mx-2 rounded-xl transition-all"
-                  onClick={() => navigate(`/leaderboard/realtime?teamId=${entry.id}&timeframe=${tf}${dateParams}`)}
+                  onClick={() => navigate(`/agency/${entry.id}`, { state: { team: entry, allTeams: sortedData } })}
                 >
                   <div className="flex items-center gap-5 min-w-0 flex-1">
                     <div className="w-8 shrink-0 flex justify-center">
@@ -285,7 +285,7 @@ export const TeamSalesSection: React.FC<TeamSalesSectionProps> = ({
                         {entry.logo?.url ? (
                              <img 
                                src={entry.logo.url} 
-                               className="w-full h-full object-contain p-2" 
+                               className="w-full h-full object-contain p-1" 
                                alt={entry.name} 
                                onError={(e) => {
                                   (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/initials/svg?seed=${entry.name}`;
@@ -308,7 +308,7 @@ export const TeamSalesSection: React.FC<TeamSalesSectionProps> = ({
                           <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">{entry.agents} <span className="font-bold">Agents</span></span>
                         </div>
                         <div className="flex items-center gap-1">
-                           <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Subs: <span className="text-indigo-500 font-black">{entry.submissions}</span></span>
+                           <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Apps: <span className="text-indigo-500 font-black">{entry.submissions}</span></span>
                         </div>
                         <div className="flex items-center gap-1">
                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Issued: <span className="text-emerald-500 font-black">{entry.issued}</span></span>

@@ -30,6 +30,7 @@ import { AgentDownlines } from './components/AgentDownlines';
 import { AgentTickets } from './components/AgentTickets';
 import { AgentleaderboardRealtime } from './components/AgentleaderboardRealtime';
 import { AgentStats } from './components/AgentStats';
+import { AgencyDetailPage } from './components/AgencyDetailPage';
 import { ModuleSwitcher } from '../../shared/components/ModuleSwitcher';
 import { NotificationBell } from '../../shared/components/NotificationBell';
 import { NotificationDirect } from '../../shared/components/NotificationDirect';
@@ -125,6 +126,7 @@ const AgentLayout: React.FC = () => {
     if (path.startsWith('/tickets')) return 'ticketing';
     if (path.startsWith('/leaderboard/realtime')) return 'overview';
     if (path.startsWith('/stats')) return 'overview';
+    if (path.startsWith('/agency/')) return 'overview';
     return null;
   })();
 
@@ -332,6 +334,7 @@ const AgentLayout: React.FC = () => {
                 <Routes>
                   <Route path="/" element={<AgentOverview />} />
                   <Route path="/leaderboard/realtime" element={<AgentleaderboardRealtime />} />
+                  <Route path="/agency/:teamId" element={<AgencyDetailPage />} />
                   <Route path="/stats" element={<AgentStats />} />
                   <Route path="/policies" element={<AgentPolicies />} />
                   <Route path="/policies/details" element={<AgentPolicyDetails />} />

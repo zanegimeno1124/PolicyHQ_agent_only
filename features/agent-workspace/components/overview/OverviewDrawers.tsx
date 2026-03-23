@@ -1,5 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, Trophy, X, Crown, Target, ChevronRight, Briefcase, User, Users, FileCheck, CheckCircle2, GitBranch, TrendingUp } from 'lucide-react';
 import { AllTimeLeaderboardEntry, CarrierBreakdown, TeamRankingEntry } from '../../services/agentOverviewApi';
 import { getAgencyName, formatCurrencyCompact } from './utils';
@@ -185,7 +186,7 @@ export const CarrierDrawer: React.FC<CarrierDrawerProps> = ({ isOpen, onClose, d
                                 <div className="grid grid-cols-3 gap-2 border-t border-slate-100 pt-4 pb-4">
                                     <div className="text-center">
                                         <p className="text-sm font-black text-slate-900">{carrier.submissions}</p>
-                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Subs</p>
+                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Apps</p>
                                     </div>
                                     <div className="text-center border-x border-slate-100">
                                         <p className="text-sm font-black text-slate-900">{carrier.issued}</p>
@@ -230,6 +231,7 @@ interface TeamRankingDrawerProps {
 }
 
 export const TeamRankingDrawer: React.FC<TeamRankingDrawerProps> = ({ isOpen, onClose, data, dateRangeLabel }) => {
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const sorted = useMemo(() => [...data].sort((a, b) => b.total_premium - a.total_premium), [data]);
   const filtered = sorted.filter(t => t.name.toLowerCase().includes(search.toLowerCase()));
@@ -267,7 +269,7 @@ export const TeamRankingDrawer: React.FC<TeamRankingDrawerProps> = ({ isOpen, on
                     filtered.map((team, idx) => {
                         const rank = idx + 1;
                         return (
-                            <div key={team.id} className="bg-slate-50 border border-slate-100 rounded-2xl p-5 hover:bg-white hover:shadow-xl hover:shadow-slate-200/50 transition-all cursor-default group">
+                            <div key={team.id} onClick={() => { onClose(); navigate(`/agency/${team.id}`, { state: { team, allTeams: sorted } }); }} className="bg-slate-50 border border-slate-100 rounded-2xl p-5 hover:bg-white hover:shadow-xl hover:shadow-slate-200/50 transition-all cursor-pointer group">
                                 <div className="flex items-center justify-between mb-4">
                                     <div className="flex items-center gap-4">
                                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black border transition-all ${
