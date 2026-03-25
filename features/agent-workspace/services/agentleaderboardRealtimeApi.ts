@@ -65,7 +65,30 @@ export interface SaleRecord {
   policyCarrier: string;
 }
 
+export interface AgentDetailsResponse {
+  production: {
+    today: { premium: number; apps: number };
+    this_week: { premium: number; apps: number };
+    mtd: { premium: number; apps: number };
+    this_year: { premium: number; apps: number };
+  };
+  sources: { name: string; apps: number; premium: number }[];
+  carrier: { name: string; apps: number; premium: number }[];
+}
+
 export const agentleaderboardRealtimeApi = {
+  /**
+   * Fetches detailed production breakdown for a single agent
+   */
+  getAgentDetails: async (agentId: string): Promise<AgentDetailsResponse> => {
+    const response = await fetch(`${BASE_URL}/leaderboard/agent_details?agent_id=${encodeURIComponent(agentId)}`, {
+      method: 'GET',
+      headers: authHeader(),
+    });
+    if (!response.ok) throw new ApiError('Failed to fetch agent details', response.status);
+    return response.json();
+  },
+
   /**
    * Fetches production rankings for Today
    */

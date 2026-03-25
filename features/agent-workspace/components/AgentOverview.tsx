@@ -26,8 +26,8 @@ import { PerformanceMetrics } from './overview/PerformanceMetrics';
 import { CarrierSection } from './overview/CarrierSection';
 import { TeamSalesSection } from './overview/TeamSalesSection';
 import { TopClosers } from './overview/TopClosers';
-import { AgentSummaryPopup } from './AgentleaderboardRealtime';
-import { agentleaderboardRealtimeApi, SaleRecord } from '../services/agentleaderboardRealtimeApi';
+import { AgentSummaryPopup, AgentSummaryStats } from './AgentleaderboardRealtime';
+import { agentleaderboardRealtimeApi } from '../services/agentleaderboardRealtimeApi';
 import { LeadInfoSection } from './overview/LeadInfoSection';
 import { ClosersDrawer, CarrierDrawer, TeamRankingDrawer } from './overview/OverviewDrawers';
 import { MiniDatePicker } from './overview/MiniDatePicker';
@@ -55,35 +55,23 @@ export const AgentOverview: React.FC = () => {
   const [isAllClosersDrawerOpen, setIsAllClosersDrawerOpen] = useState(false);
   const [isCarrierDrawerOpen, setIsCarrierDrawerOpen] = useState(false);
   const [isTeamDrawerOpen, setIsTeamDrawerOpen] = useState(false);
-  const [popupStats, setPopupStats] = useState<{
-    agent_id: string; agent_name: string; agent_profile_url?: string | null;
-    agency: string; today: { premium: number; apps: number };
-    mtd: { premium: number; apps: number }; recentSales: SaleRecord[]; sources: string[];
-  } | null>(null);
+  const [popupStats, setPopupStats] = useState<AgentSummaryStats | null>(null);
   const [popupLoading, setPopupLoading] = useState(false);
 
   const handleAgentClick = async (agentId: string) => {
     setPopupLoading(true);
     setPopupStats(null);
     try {
-      const [todayRes, mtdRes, feedRes] = await Promise.all([
-        agentleaderboardRealtimeApi.getRealtimeLeaderboard(null),
-        agentleaderboardRealtimeApi.getMTDLeaderboard(),
-        agentleaderboardRealtimeApi.getArenaFeed(),
-      ]);
-      const todayMatch = (todayRes.today_rundown || []).find((e: any) => e.agent_id === agentId);
-      const mtdMatch = (mtdRes.mtd_rundown || []).find((e: any) => e.agent_id === agentId);
-      const feedMatches: SaleRecord[] = (feedRes || []).filter((e: any) => e.agentId === agentId);
+      const res = await agentleaderboardRealtimeApi.getAgentDetails(agentId);
       const entry = leaderboardData.find(e => e.agent_id === agentId);
       setPopupStats({
         agent_id: agentId,
-        agent_name: entry?.agent_name || todayMatch?.agent_name || 'Agent',
-        agent_profile_url: entry?.agent_profile?.url || todayMatch?.agent_profile?.url || null,
-        agency: (entry?.agency as any)?.label || todayMatch?.agency || 'Organization',
-        today: { premium: todayMatch?.total_annualPremium || 0, apps: todayMatch?.records || 0 },
-        mtd: { premium: mtdMatch?.total_annualPremium || 0, apps: mtdMatch?.records || 0 },
-        recentSales: feedMatches,
-        sources: [...new Set(feedMatches.map((s: SaleRecord) => s.sourceName).filter(Boolean))],
+        agent_name: entry?.agent_name || 'Agent',
+        agent_profile_url: entry?.agent_profile?.url || null,
+        agency: (entry?.agency as any)?.label || (entry?.agency as any) || 'Organization',
+        production: res.production,
+        sources: res.sources,
+        carrier: res.carrier,
       });
     } catch (err) {
       console.error('Agent popup fetch failed', err);
@@ -249,15 +237,12 @@ export const AgentOverview: React.FC = () => {
         <div className="flex items-center gap-4">
           <div className="relative group">
               <button 
-                  disabled
-                  className="flex items-center gap-3 bg-slate-50 text-slate-300 border border-slate-100 px-6 py-3 rounded-2xl cursor-not-allowed transition-all shadow-sm"
+                  onClick={() => navigate('/my-profile')}
+                  className="flex items-center gap-3 bg-slate-900 text-white px-6 py-3 rounded-2xl border border-slate-800 hover:bg-black transition-all shadow-xl group"
               >
-                  <BarChart3 className="w-5 h-5 text-slate-300" />
+                  <BarChart3 className="w-5 h-5 text-brand-500" />
                   <span className="text-[10px] font-black uppercase tracking-[0.2em]">My Stats</span>
               </button>
-              <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-brand-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap border-2 border-white z-10">
-                  COMING SOON
-              </div>
           </div>
 
           <div className="relative group">
