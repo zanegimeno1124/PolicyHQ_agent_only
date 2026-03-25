@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trophy, ChevronDown, Star, Crown, Loader2, Users, FileCheck, CheckCircle2, Sparkles, TrendingUp, ArrowRight, GitBranch } from 'lucide-react';
 import { TeamRankingEntry } from '../../services/agentOverviewApi';
@@ -71,13 +71,18 @@ export const TeamSalesSection: React.FC<TeamSalesSectionProps> = ({
   onViewAll
 }) => {
   const navigate = useNavigate();
+  const [rankMode, setRankMode] = useState<'direct' | 'impact'>('direct');
   const tf = mapLabelToTimeframe(dateRangeLabel);
   const dateParams = tf === 'custom' && dateRangeStart && dateRangeEnd
     ? `&startDate=${new Date(dateRangeStart).toISOString().split('T')[0]}&endDate=${new Date(dateRangeEnd).toISOString().split('T')[0]}`
     : '';
   const sortedData = useMemo(() => {
-    return [...teamRankingData].sort((a, b) => b.total_premium - a.total_premium);
-  }, [teamRankingData]);
+    return [...teamRankingData].sort((a, b) => {
+      const valA = rankMode === 'impact' ? a.total_premium + getBreakout(a) : a.total_premium;
+      const valB = rankMode === 'impact' ? b.total_premium + getBreakout(b) : b.total_premium;
+      return valB - valA;
+    });
+  }, [teamRankingData, rankMode]);
 
   const { featuredEntry, featuredRank } = useMemo(() => {
     if (sortedData.length === 0) return { featuredEntry: null, featuredRank: '—' };
@@ -117,9 +122,35 @@ export const TeamSalesSection: React.FC<TeamSalesSectionProps> = ({
         <div className="absolute top-[-20%] left-[-10%] w-64 h-64 border-[25px] border-white/5 rounded-full"></div>
         <div className="absolute bottom-[-20%] right-[-5%] w-56 h-56 bg-brand-500/10 rounded-full blur-3xl"></div>
 
-        <div className="relative z-10 flex flex-col items-center">
-          <h3 className="text-white font-black text-xl tracking-tight mb-2">Organizational Standings</h3>
+        <div className="relative z-10 flex flex-col items-center gap-4">
+          <h3 className="text-white font-black text-xl tracking-tight">Organizational Standings</h3>
           <p className="text-indigo-300/40 text-[10px] font-black uppercase tracking-[0.25em]">{dateRangeLabel} By Agency</p>
+
+          {/* Toggle switch */}
+          <div className="flex items-center gap-1 bg-white/10 rounded-full p-1 border border-white/10">
+            <button
+              onClick={() => setRankMode('direct')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all duration-200 ${
+                rankMode === 'direct'
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'text-white/50 hover:text-white/80'
+              }`}
+            >
+              <Trophy className="w-3 h-3" />
+              Direct
+            </button>
+            <button
+              onClick={() => setRankMode('impact')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all duration-200 ${
+                rankMode === 'impact'
+                  ? 'bg-emerald-500 text-white shadow-sm'
+                  : 'text-white/50 hover:text-white/80'
+              }`}
+            >
+              <TrendingUp className="w-3 h-3" />
+              Impact
+            </button>
+          </div>
         </div>
 
         {/* Floating Trophy Icon */}
@@ -200,13 +231,23 @@ export const TeamSalesSection: React.FC<TeamSalesSectionProps> = ({
                 className={`inline-flex flex-col items-center w-full max-w-[240px] px-6 py-4 bg-white/95 backdrop-blur-xl border border-white rounded-[2rem] shadow-[0_15px_40px_-10px_rgba(0,0,0,0.15)] group/val transition-transform hover:scale-105 ${featuredEntry ? 'cursor-pointer' : ''}`}
                 onClick={() => featuredEntry && navigate(`/agency/${featuredEntry.id}`, { state: { team: featuredEntry, allTeams: sortedData } })}
             >
-              <span className="text-[9px] font-black text-amber-600 uppercase tracking-[0.25em] mb-1">Production Value</span>
+              <span className={`text-[9px] font-black uppercase tracking-[0.25em] mb-1 ${rankMode === 'impact' ? 'text-emerald-600' : 'text-amber-600'}`}>
+                {rankMode === 'impact' ? 'Leadership Impact' : 'Production Value'}
+              </span>
               <div className="flex items-center gap-3">
                 <span className="text-slate-900 text-3xl font-black tracking-tighter">
-                  {featuredEntry ? formatCurrencyCompact(featuredEntry.total_premium) : '$0'}
+                  {featuredEntry
+                    ? formatCurrencyCompact(
+                        rankMode === 'impact'
+                          ? featuredEntry.total_premium + getBreakout(featuredEntry)
+                          : featuredEntry.total_premium
+                      )
+                    : '$0'}
                 </span>
-                <div className="bg-amber-100 p-1 rounded-lg">
-                    <TrendingUp className="w-4 h-4 text-amber-600" strokeWidth={3} />
+                <div className={`p-1 rounded-lg ${rankMode === 'impact' ? 'bg-emerald-100' : 'bg-amber-100'}`}>
+                    {rankMode === 'impact'
+                      ? <TrendingUp className="w-4 h-4 text-emerald-600" strokeWidth={3} />
+                      : <TrendingUp className="w-4 h-4 text-amber-600" strokeWidth={3} />}
                 </div>
               </div>
             </div>
@@ -319,16 +360,28 @@ export const TeamSalesSection: React.FC<TeamSalesSectionProps> = ({
 
                   <div className="flex items-center gap-2 shrink-0 ml-4">
                     <div className="text-right">
-                      <p className="text-base font-black text-slate-900 tracking-tighter group-hover/item:text-amber-500 transition-colors">
-                        {formatCurrencyCompact(entry.total_premium)}
+                      <p className={`text-base font-black tracking-tighter transition-colors ${
+                        rankMode === 'impact'
+                          ? 'text-emerald-600 group-hover/item:text-emerald-500'
+                          : 'text-slate-900 group-hover/item:text-amber-500'
+                      }`}>
+                        {rankMode === 'impact'
+                          ? formatCurrencyCompact(entry.total_premium + getBreakout(entry))
+                          : formatCurrencyCompact(entry.total_premium)}
                       </p>
-                      <p className="text-[9px] font-extrabold text-slate-300 uppercase tracking-widest">Premium</p>
+                      <p className="text-[9px] font-extrabold text-slate-300 uppercase tracking-widest">
+                        {rankMode === 'impact' ? 'Impact' : 'Premium'}
+                      </p>
                       <div className="flex flex-col gap-0.5 mt-1.5 pt-1.5 border-t border-slate-100">
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                          Breakout: <span className="text-indigo-500">{formatCurrencyCompact(getBreakout(entry))}</span>
+                        <p className={`text-[9px] font-black uppercase tracking-widest ${
+                          rankMode === 'direct' ? 'text-indigo-600' : 'text-slate-400'
+                        }`}>
+                          Direct: <span>{formatCurrencyCompact(entry.total_premium)}</span>
                         </p>
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                          Impact: <span className="text-emerald-500">{formatCurrencyCompact(entry.total_premium + getBreakout(entry))}</span>
+                        <p className={`text-[9px] font-black uppercase tracking-widest ${
+                          rankMode === 'impact' ? 'text-emerald-600' : 'text-slate-400'
+                        }`}>
+                          Breakout: <span>{formatCurrencyCompact(getBreakout(entry))}</span>
                         </p>
                       </div>
                     </div>
