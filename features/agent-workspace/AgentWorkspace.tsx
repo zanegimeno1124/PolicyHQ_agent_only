@@ -16,7 +16,8 @@ import {
   Users, 
   Ticket,
   Trophy,
-  Check // Imported Check
+  Check, // Imported Check
+  PhoneCall
 } from 'lucide-react';
 import { useAgentContext } from './context/AgentContext';
 import { useAuth } from '../../context/AuthContext';
@@ -29,6 +30,7 @@ import { AgentDebtRecovery } from './components/AgentDebtRecovery';
 import { AgentDownlines } from './components/AgentDownlines';
 import { AgentTickets } from './components/AgentTickets';
 import { AgentleaderboardRealtime } from './components/AgentleaderboardRealtime';
+import { CallReportPolicytek } from './components/CallReportPolicytek';
 import { AgentStats } from './components/AgentStats';
 import { AgencyDetailPage } from './components/AgencyDetailPage';
 import { MyProfilePage } from './components/MyProfilePage';
@@ -36,6 +38,109 @@ import { ModuleSwitcher } from '../../shared/components/ModuleSwitcher';
 import { NotificationBell } from '../../shared/components/NotificationBell';
 import { NotificationDirect } from '../../shared/components/NotificationDirect';
 import { NotificationSale } from '../../shared/components/NotificationSale';
+
+// Sidebar Group - Expandable parent with sub-items
+const SidebarGroup = ({
+  icon,
+  label,
+  active,
+  locked,
+  collapsed,
+  children,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  active: boolean;
+  locked?: boolean;
+  collapsed?: boolean;
+  children: React.ReactNode;
+}) => {
+  const [open, setOpen] = React.useState(active);
+
+  React.useEffect(() => {
+    if (active) setOpen(true);
+  }, [active]);
+
+  return (
+    <div className="w-full mb-1">
+      <button
+        onClick={() => !locked && setOpen((o) => !o)}
+        className={`
+          relative flex items-center transition-all duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1.0)] group
+          ${collapsed
+            ? 'justify-center w-12 h-12 rounded-2xl mx-auto'
+            : 'w-full px-5 py-4 rounded-[1.25rem] gap-4'
+          }
+          ${active
+            ? 'bg-brand-500/10 text-slate-900 border border-brand-500/20'
+            : locked
+            ? 'opacity-50 cursor-not-allowed grayscale'
+            : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+          }
+        `}
+        title={collapsed ? label : undefined}
+      >
+        <span className={`shrink-0 transition-transform duration-300 ${collapsed ? 'scale-110' : 'scale-100'} ${active ? 'text-brand-500' : 'text-slate-400 group-hover:text-slate-600'}`}>
+          {icon}
+        </span>
+        <span className={`
+          font-bold text-sm whitespace-nowrap overflow-hidden transition-all duration-300 origin-left flex-1 text-left
+          ${collapsed ? 'w-0 opacity-0 -translate-x-2' : 'w-auto opacity-100 translate-x-0'}
+        `}>
+          {label}
+        </span>
+        {!collapsed && !locked && (
+          <ChevronDown
+            size={14}
+            className={`shrink-0 transition-transform duration-300 ${open ? 'rotate-180' : ''} ${active ? 'text-brand-400' : 'text-slate-400'}`}
+          />
+        )}
+        {!collapsed && locked && <Lock className="w-3.5 h-3.5 text-slate-300 shrink-0" />}
+        {active && collapsed && (
+          <span className="absolute top-2 right-2 w-2 h-2 bg-brand-500 rounded-full border border-white animate-in zoom-in duration-300" />
+        )}
+      </button>
+
+      {!collapsed && open && (
+        <div className="mt-2 ml-3 pl-4 border-l-2 border-brand-500/20 space-y-1 pb-1 animate-in fade-in slide-in-from-top-1 duration-200">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Sub-item inside a SidebarGroup
+const SidebarSubItem = ({
+  to,
+  label,
+  active,
+  locked,
+}: {
+  to: string;
+  label: string;
+  active: boolean;
+  locked?: boolean;
+}) => (
+  <Link
+    to={locked ? '#' : to}
+    onClick={(e) => locked && e.preventDefault()}
+    className={`
+      flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all duration-200
+      ${
+        active
+          ? 'bg-slate-900 text-white shadow-md shadow-slate-900/10'
+          : locked
+          ? 'text-slate-400 cursor-not-allowed'
+          : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+      }
+    `}
+  >
+    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${active ? 'bg-brand-400' : 'bg-slate-300'}`} />
+    {label}
+    {locked && <span className="ml-auto text-[10px] font-black text-slate-300 uppercase tracking-wider">Soon</span>}
+  </Link>
+);
 
 // Sidebar Item - Polished iOS Style
 const SidebarItem = ({ 
@@ -265,7 +370,7 @@ const AgentLayout: React.FC = () => {
         </div>
         
         {/* Nav Items */}
-        <nav className="space-y-1 flex flex-col items-center w-full flex-1">
+        <nav className="space-y-1 flex flex-col items-center w-full flex-1 overflow-y-auto overflow-x-hidden min-h-0 scrollbar-hide">
             <SidebarItem to="/" icon={<Trophy size={20} />} label="Leaderboard" active={location.pathname === '/' || location.pathname === ''} locked={isLocked('overview')} collapsed={isCollapsed} />
             <SidebarItem to="/policies" icon={<FileCheck size={20} />} label="Policies" active={isActive('/policies')} locked={isLocked('policies')} collapsed={isCollapsed} />
             <SidebarItem to="/downlines" icon={<Users size={20} />} label="Downlines" active={isActive('/downlines')} locked={isLocked('downlines')} collapsed={isCollapsed} />
@@ -273,6 +378,16 @@ const AgentLayout: React.FC = () => {
             <SidebarItem to="/commissions" icon={<DollarSign size={20} />} label="Commissions" active={isActive('/commissions')} locked={isLocked('commissions')} collapsed={isCollapsed} />
             <SidebarItem to="/debts" icon={<AlertCircle size={20} />} label="Debt Recovery" active={isActive('/debts')} locked={isLocked('debts')} collapsed={isCollapsed} />
             <SidebarItem to="/tickets" icon={<Ticket size={20} />} label="Tickets" active={isActive('/tickets')} locked={isLocked('ticketing')} collapsed={isCollapsed} />
+            <SidebarGroup
+              icon={<PhoneCall size={20} />}
+              label="Call Report"
+              active={location.pathname.startsWith('/call-report')}
+              collapsed={isCollapsed}
+            >
+              <SidebarSubItem to="/call-report/policytek" label="PolicyTek" active={isActive('/call-report/policytek')} />
+              <SidebarSubItem to="/call-report/wavv" label="Wavv" active={isActive('/call-report/wavv')} locked />
+              <SidebarSubItem to="/call-report/callx" label="CallX" active={isActive('/call-report/callx')} locked />
+            </SidebarGroup>
         </nav>
 
         {/* User Profile Footer */}
@@ -336,6 +451,7 @@ const AgentLayout: React.FC = () => {
                 <Routes>
                   <Route path="/" element={<AgentOverview />} />
                   <Route path="/leaderboard/realtime" element={<AgentleaderboardRealtime />} />
+                  <Route path="/call-report/policytek" element={<CallReportPolicytek />} />
                   <Route path="/agency/:teamId" element={<AgencyDetailPage />} />
                   <Route path="/stats" element={<AgentStats />} />
                   <Route path="/my-profile" element={<MyProfilePage />} />
