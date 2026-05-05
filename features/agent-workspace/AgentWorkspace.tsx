@@ -46,6 +46,7 @@ const SidebarGroup = ({
   active,
   locked,
   collapsed,
+  dark,
   children,
 }: {
   icon: React.ReactNode;
@@ -53,6 +54,7 @@ const SidebarGroup = ({
   active: boolean;
   locked?: boolean;
   collapsed?: boolean;
+  dark?: boolean;
   children: React.ReactNode;
 }) => {
   const [open, setOpen] = React.useState(active);
@@ -72,15 +74,15 @@ const SidebarGroup = ({
             : 'w-full px-5 py-4 rounded-[1.25rem] gap-4'
           }
           ${active
-            ? 'bg-brand-500/10 text-slate-900 border border-brand-500/20'
+            ? dark ? 'bg-white/8 text-white border border-brand-500/30' : 'bg-brand-500/10 text-slate-900 border border-brand-500/20'
             : locked
             ? 'opacity-50 cursor-not-allowed grayscale'
-            : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+            : dark ? 'text-slate-500 hover:bg-white/5 hover:text-white' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
           }
         `}
         title={collapsed ? label : undefined}
       >
-        <span className={`shrink-0 transition-transform duration-300 ${collapsed ? 'scale-110' : 'scale-100'} ${active ? 'text-brand-500' : 'text-slate-400 group-hover:text-slate-600'}`}>
+        <span className={`shrink-0 transition-transform duration-300 ${collapsed ? 'scale-110' : 'scale-100'} ${active ? 'text-brand-500' : dark ? 'text-slate-600 group-hover:text-slate-300' : 'text-slate-400 group-hover:text-slate-600'}`}>
           {icon}
         </span>
         <span className={`
@@ -92,7 +94,7 @@ const SidebarGroup = ({
         {!collapsed && !locked && (
           <ChevronDown
             size={14}
-            className={`shrink-0 transition-transform duration-300 ${open ? 'rotate-180' : ''} ${active ? 'text-brand-400' : 'text-slate-400'}`}
+            className={`shrink-0 transition-transform duration-300 ${open ? 'rotate-180' : ''} ${active ? 'text-brand-400' : dark ? 'text-slate-600' : 'text-slate-400'}`}
           />
         )}
         {!collapsed && locked && <Lock className="w-3.5 h-3.5 text-slate-300 shrink-0" />}
@@ -102,7 +104,7 @@ const SidebarGroup = ({
       </button>
 
       {!collapsed && open && (
-        <div className="mt-2 ml-3 pl-4 border-l-2 border-brand-500/20 space-y-1 pb-1 animate-in fade-in slide-in-from-top-1 duration-200">
+        <div className={`mt-2 ml-3 pl-4 border-l-2 space-y-1 pb-1 animate-in fade-in slide-in-from-top-1 duration-200 ${dark ? 'border-white/10' : 'border-brand-500/20'}`}>
           {children}
         </div>
       )}
@@ -116,11 +118,13 @@ const SidebarSubItem = ({
   label,
   active,
   locked,
+  dark,
 }: {
   to: string;
   label: string;
   active: boolean;
   locked?: boolean;
+  dark?: boolean;
 }) => (
   <Link
     to={locked ? '#' : to}
@@ -129,16 +133,16 @@ const SidebarSubItem = ({
       flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all duration-200
       ${
         active
-          ? 'bg-slate-900 text-white shadow-md shadow-slate-900/10'
+          ? 'bg-white/10 text-white shadow-md'
           : locked
-          ? 'text-slate-400 cursor-not-allowed'
-          : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+          ? dark ? 'text-slate-700 cursor-not-allowed' : 'text-slate-400 cursor-not-allowed'
+          : dark ? 'text-slate-500 hover:bg-white/5 hover:text-white' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
       }
     `}
   >
-    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${active ? 'bg-brand-400' : 'bg-slate-300'}`} />
+    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${active ? 'bg-brand-400' : dark ? 'bg-slate-700' : 'bg-slate-300'}`} />
     {label}
-    {locked && <span className="ml-auto text-[10px] font-black text-slate-300 uppercase tracking-wider">Soon</span>}
+    {locked && <span className={`ml-auto text-[10px] font-black uppercase tracking-wider ${dark ? 'text-slate-700' : 'text-slate-300'}`}>Soon</span>}
   </Link>
 );
 
@@ -149,14 +153,16 @@ const SidebarItem = ({
   label, 
   active, 
   locked, 
-  collapsed 
+  collapsed,
+  dark,
 }: { 
   to: string, 
   icon: React.ReactNode, 
   label: string, 
   active: boolean, 
   locked?: boolean, 
-  collapsed?: boolean 
+  collapsed?: boolean,
+  dark?: boolean,
 }) => {
   return (
     <Link 
@@ -169,15 +175,15 @@ const SidebarItem = ({
           : 'w-full px-5 py-4 rounded-[1.25rem] gap-4 mb-2'
         }
         ${active 
-          ? 'bg-slate-900 text-white shadow-xl shadow-slate-900/20 scale-[1.02]' 
+          ? 'bg-white/10 text-white shadow-xl shadow-black/30 scale-[1.02]' 
           : locked 
             ? 'opacity-50 cursor-not-allowed grayscale' 
-            : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+            : dark ? 'text-slate-500 hover:bg-white/5 hover:text-white' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
         }
       `}
       title={collapsed ? label : undefined}
     >
-      <span className={`shrink-0 transition-transform duration-300 ${collapsed ? 'scale-110' : 'scale-100'} ${active ? 'text-brand-400' : 'text-slate-400 group-hover:text-slate-600'}`}>
+      <span className={`shrink-0 transition-transform duration-300 ${collapsed ? 'scale-110' : 'scale-100'} ${active ? 'text-brand-400' : dark ? 'text-slate-600 group-hover:text-slate-300' : 'text-slate-400 group-hover:text-slate-600'}`}>
         {icon}
       </span>
       
@@ -219,6 +225,7 @@ const AgentLayout: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const isActive = (path: string) => location.pathname === path || (path !== '/' && location.pathname.startsWith(path));
+  const isDarkRoute = location.pathname.startsWith('/call-report');
   
   // Feature Key Determination
   const featureKey = (() => {
@@ -253,19 +260,20 @@ const AgentLayout: React.FC = () => {
     : 'HQ';
 
   return (
-    <div className="h-screen bg-[#D4DBE5] flex font-sans overflow-hidden p-4 gap-4 selection:bg-brand-500/30 selection:text-brand-900">
+    <div className={`h-screen flex font-sans overflow-hidden p-4 gap-4 selection:bg-brand-500/30 selection:text-brand-900 transition-colors duration-500 ${isDarkRoute ? 'bg-[#08080f]' : 'bg-[#D4DBE5]'}`}>
       {/* Floating Sidebar */}
       <aside 
         className={`
           ${isCollapsed ? 'w-24 px-3' : 'w-80 px-6'} 
-          bg-white rounded-[2.5rem] flex flex-col transition-[width,padding] duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1.0)] 
-          shadow-[0_20px_60px_-10px_rgba(0,0,0,0.12)] border border-slate-200/80 relative z-20 shrink-0 py-8
+          ${isDarkRoute ? 'bg-[#0d0d1a] border-white/6' : 'bg-white border-slate-200/80 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.12)]'}
+          rounded-[2.5rem] flex flex-col transition-[width,padding,background-color,border-color] duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1.0)] 
+          border relative z-20 shrink-0 py-8
         `}
       >
         {/* Toggle Handle */}
         <button 
           onClick={() => setIsCollapsed(!isCollapsed)} 
-          className="absolute -right-3 top-12 w-8 h-8 bg-white border border-slate-100 rounded-full shadow-lg shadow-slate-200/50 flex items-center justify-center text-slate-400 hover:text-brand-500 transition-all z-50 hover:scale-110 active:scale-95"
+          className={`absolute -right-3 top-12 w-8 h-8 rounded-full shadow-lg flex items-center justify-center transition-all z-50 hover:scale-110 active:scale-95 ${isDarkRoute ? 'bg-[#0d0d1a] border border-white/10 text-slate-600 hover:text-brand-400' : 'bg-white border border-slate-100 shadow-slate-200/50 text-slate-400 hover:text-brand-500'}`}
         >
           {isCollapsed ? <ChevronRight size={16} strokeWidth={3} /> : <ChevronLeft size={16} strokeWidth={3} />}
         </button>
@@ -281,10 +289,10 @@ const AgentLayout: React.FC = () => {
                 )}
             </div>
             <div className={`overflow-hidden transition-all duration-500 ${isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
-                <span className="font-extrabold text-2xl text-slate-900 tracking-tight whitespace-nowrap block">
+                <span className={`font-extrabold text-2xl tracking-tight whitespace-nowrap block ${isDarkRoute ? 'text-white' : 'text-slate-900'}`}>
                   PolicyHQ
                 </span>
-                <span className="text-[10px] font-bold text-slate-400 tracking-widest uppercase truncate block">
+                <span className={`text-[10px] font-bold tracking-widest uppercase truncate block ${isDarkRoute ? 'text-slate-600' : 'text-slate-400'}`}>
                   {user?.agencyName || 'Agent Portal'}
                 </span>
             </div>
@@ -296,7 +304,7 @@ const AgentLayout: React.FC = () => {
               <>
                 <button 
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className={`w-full flex items-center justify-between bg-slate-50 border border-slate-100 text-slate-800 text-sm font-bold rounded-2xl py-4 px-5 transition-all hover:bg-white hover:shadow-lg hover:shadow-slate-200/50 ${isDropdownOpen ? 'ring-2 ring-brand-500/20 border-brand-500 bg-white' : ''}`}
+                  className={`w-full flex items-center justify-between text-sm font-bold rounded-2xl py-4 px-5 transition-all ${isDarkRoute ? 'bg-white/5 border border-white/8 text-slate-300 hover:bg-white/8' : 'bg-slate-50 border border-slate-100 text-slate-800 hover:bg-white hover:shadow-lg hover:shadow-slate-200/50'} ${isDropdownOpen ? 'ring-2 ring-brand-500/20 border-brand-500' : ''}`}
                 >
                   <div className="flex items-center gap-3 overflow-hidden">
                       <div className={`w-2 h-2 rounded-full shrink-0 ${isImpersonating ? 'bg-amber-500' : 'bg-emerald-500'}`}></div>
@@ -366,41 +374,42 @@ const AgentLayout: React.FC = () => {
 
         {/* Navigation Label */}
         <div className={`transition-all duration-300 px-2 mb-4 ${isCollapsed ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100 h-auto'}`}>
-          <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest pl-2">Menu</div>
+          <div className={`text-[10px] font-extrabold uppercase tracking-widest pl-2 ${isDarkRoute ? 'text-slate-700' : 'text-slate-400'}`}>Menu</div>
         </div>
         
         {/* Nav Items */}
         <nav className="space-y-1 flex flex-col items-center w-full flex-1 overflow-y-auto overflow-x-hidden min-h-0 scrollbar-hide">
-            <SidebarItem to="/" icon={<Trophy size={20} />} label="Leaderboard" active={location.pathname === '/' || location.pathname === ''} locked={isLocked('overview')} collapsed={isCollapsed} />
-            <SidebarItem to="/policies" icon={<FileCheck size={20} />} label="Policies" active={isActive('/policies')} locked={isLocked('policies')} collapsed={isCollapsed} />
-            <SidebarItem to="/downlines" icon={<Users size={20} />} label="Downlines" active={isActive('/downlines')} locked={isLocked('downlines')} collapsed={isCollapsed} />
-            <SidebarItem to="/splits" icon={<Split size={20} />} label="Splits" active={isActive('/splits')} locked={isLocked('splits')} collapsed={isCollapsed} />
-            <SidebarItem to="/commissions" icon={<DollarSign size={20} />} label="Commissions" active={isActive('/commissions')} locked={isLocked('commissions')} collapsed={isCollapsed} />
-            <SidebarItem to="/debts" icon={<AlertCircle size={20} />} label="Debt Recovery" active={isActive('/debts')} locked={isLocked('debts')} collapsed={isCollapsed} />
-            <SidebarItem to="/tickets" icon={<Ticket size={20} />} label="Tickets" active={isActive('/tickets')} locked={isLocked('ticketing')} collapsed={isCollapsed} />
+            <SidebarItem to="/" icon={<Trophy size={20} />} label="Leaderboard" active={location.pathname === '/' || location.pathname === ''} locked={isLocked('overview')} collapsed={isCollapsed} dark={isDarkRoute} />
+            <SidebarItem to="/policies" icon={<FileCheck size={20} />} label="Policies" active={isActive('/policies')} locked={isLocked('policies')} collapsed={isCollapsed} dark={isDarkRoute} />
+            <SidebarItem to="/downlines" icon={<Users size={20} />} label="Downlines" active={isActive('/downlines')} locked={isLocked('downlines')} collapsed={isCollapsed} dark={isDarkRoute} />
+            <SidebarItem to="/splits" icon={<Split size={20} />} label="Splits" active={isActive('/splits')} locked={isLocked('splits')} collapsed={isCollapsed} dark={isDarkRoute} />
+            <SidebarItem to="/commissions" icon={<DollarSign size={20} />} label="Commissions" active={isActive('/commissions')} locked={isLocked('commissions')} collapsed={isCollapsed} dark={isDarkRoute} />
+            <SidebarItem to="/debts" icon={<AlertCircle size={20} />} label="Debt Recovery" active={isActive('/debts')} locked={isLocked('debts')} collapsed={isCollapsed} dark={isDarkRoute} />
+            <SidebarItem to="/tickets" icon={<Ticket size={20} />} label="Tickets" active={isActive('/tickets')} locked={isLocked('ticketing')} collapsed={isCollapsed} dark={isDarkRoute} />
             <SidebarGroup
               icon={<PhoneCall size={20} />}
               label="Activity Dashboard"
               active={location.pathname.startsWith('/call-report')}
               collapsed={isCollapsed}
+              dark={isDarkRoute}
             >
-              <SidebarSubItem to="/call-report/policytek" label="PolicyTek" active={isActive('/call-report/policytek')} />
-              <SidebarSubItem to="/call-report/wavv" label="Wavv" active={isActive('/call-report/wavv')} locked />
-              <SidebarSubItem to="/call-report/callx" label="CallX" active={isActive('/call-report/callx')} locked />
+              <SidebarSubItem to="/call-report/policytek" label="PolicyTek" active={isActive('/call-report/policytek')} dark={isDarkRoute} />
+              <SidebarSubItem to="/call-report/wavv" label="Wavv" active={isActive('/call-report/wavv')} locked dark={isDarkRoute} />
+              <SidebarSubItem to="/call-report/callx" label="CallX" active={isActive('/call-report/callx')} locked dark={isDarkRoute} />
             </SidebarGroup>
         </nav>
 
         {/* User Profile Footer */}
         <div className="mt-auto w-full pt-4">
-            <div className={`flex items-center gap-3 p-2.5 rounded-[1.25rem] border transition-all duration-500 ${isCollapsed ? 'justify-center border-transparent bg-transparent' : 'bg-slate-50 border-slate-100 hover:bg-white hover:shadow-lg hover:shadow-slate-200/50'}`}>
-                <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-slate-900 text-xs font-black border-2 border-slate-100 shadow-sm shrink-0">
+            <div className={`flex items-center gap-3 p-2.5 rounded-[1.25rem] border transition-all duration-500 ${isCollapsed ? 'justify-center border-transparent bg-transparent' : isDarkRoute ? 'bg-white/5 border-white/6 hover:bg-white/8' : 'bg-slate-50 border-slate-100 hover:bg-white hover:shadow-lg hover:shadow-slate-200/50'}`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-black border-2 shadow-sm shrink-0 ${isDarkRoute ? 'bg-white/10 text-white border-white/10' : 'bg-white text-slate-900 border-slate-100'}`}>
                   {user?.name?.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
                 </div>
                 
                 <div className={`flex-1 min-w-0 transition-all duration-500 ${isCollapsed ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`}>
-                    <p className="text-sm font-bold text-slate-900 truncate">{user?.name}</p>
+                    <p className={`text-sm font-bold truncate ${isDarkRoute ? 'text-white' : 'text-slate-900'}`}>{user?.name}</p>
                     <div className="flex flex-col gap-0.5 mt-0.5">
-                        <p className="text-[10px] text-slate-400 truncate font-bold uppercase tracking-wider">NPN: {user?.npn || '11241995'}</p>
+                        <p className={`text-[10px] truncate font-bold uppercase tracking-wider ${isDarkRoute ? 'text-slate-600' : 'text-slate-400'}`}>NPN: {user?.npn || '11241995'}</p>
                         <p className="text-[9px] text-brand-500 truncate font-black uppercase tracking-tighter">{user?.agencyName || 'PolicyHQ'}</p>
                     </div>
                 </div>
@@ -413,7 +422,7 @@ const AgentLayout: React.FC = () => {
       </aside>
 
       {/* Main Content - Floating Panel */}
-      <main className={`flex-1 min-w-0 h-full overflow-hidden ${isRestricted ? 'bg-slate-950 border-slate-900' : 'bg-transparent'} flex flex-col relative transition-colors duration-500`}>
+      <main className={`flex-1 min-w-0 h-full overflow-hidden flex flex-col relative transition-colors duration-500 ${isRestricted ? 'bg-slate-950' : isDarkRoute ? 'bg-[#08080f] rounded-[2.5rem]' : 'bg-transparent'}`}>
         {isRestricted ? (
             <div className="flex-1 h-full flex flex-col items-center justify-center relative overflow-hidden text-center p-8 animate-in fade-in duration-500 rounded-[2.5rem]">
                 <div className="w-24 h-24 rounded-[2rem] bg-slate-900 border border-slate-800 flex items-center justify-center mb-8 shadow-2xl shadow-black/50 ring-1 ring-white/5 relative group">
@@ -429,9 +438,9 @@ const AgentLayout: React.FC = () => {
             </div>
         ) : (
             <div className="flex-1 overflow-y-auto scroll-smooth scrollbar-hide">
-            <header className="h-24 sticky top-0 z-[100] px-6 flex items-center justify-between mb-2 bg-white/60 backdrop-blur-md rounded-2xl mt-2 mx-2 shadow-sm border border-white/80">
+            <header className={`h-24 sticky top-0 z-[100] px-6 flex items-center justify-between mb-2 rounded-2xl mt-2 mx-2 shadow-sm transition-colors duration-500 ${isDarkRoute ? 'bg-white/5 backdrop-blur-md border border-white/8' : 'bg-white/60 backdrop-blur-md border border-white/80'}`}>
                 <div className="flex items-center gap-4">
-                    <h2 className="text-3xl font-black text-slate-900 tracking-tighter">
+                    <h2 className={`text-3xl font-black tracking-tighter transition-colors duration-500 ${isDarkRoute ? 'text-white' : 'text-slate-900'}`}>
                     {viewingAgentName}
                     {isImpersonating && <span className="ml-3 inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 align-middle border border-amber-200">READ ONLY</span>}
                     </h2>

@@ -15,6 +15,7 @@ import {
   Users,
   BarChart3,
   Search,
+  TrendingUp,
 } from 'lucide-react';
 import {
   callReportPolicytekApi,
@@ -214,14 +215,14 @@ const formatDuration = (seconds: number): string => {
 };
 
 const AVATAR_COLORS = [
-  'bg-violet-100 text-violet-700',
-  'bg-sky-100 text-sky-700',
-  'bg-emerald-100 text-emerald-700',
-  'bg-amber-100 text-amber-700',
-  'bg-rose-100 text-rose-700',
-  'bg-indigo-100 text-indigo-700',
-  'bg-teal-100 text-teal-700',
-  'bg-orange-100 text-orange-700',
+  'bg-violet-900/40 text-violet-300',
+  'bg-sky-900/40 text-sky-300',
+  'bg-emerald-900/40 text-emerald-300',
+  'bg-amber-900/40 text-amber-300',
+  'bg-rose-900/40 text-rose-300',
+  'bg-indigo-900/40 text-indigo-300',
+  'bg-teal-900/40 text-teal-300',
+  'bg-orange-900/40 text-orange-300',
 ];
 
 const AgentAvatar = ({ name, index }: { name: string; index: number }) => {
@@ -285,241 +286,306 @@ export const CallReportPolicytek: React.FC = () => {
   const totalSubmittedPremium = entries.reduce((s, e) => s + (e.submitted_premium ?? 0), 0);
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-slate-900 flex items-center justify-center shadow-lg shadow-slate-900/20">
-            <Phone className="w-5 h-5 text-brand-400" />
-          </div>
+    <div className="animate-in fade-in duration-300 -mx-6 -mt-4 -mb-12">
+      {/* ── Dark Background ──────────────────────────────────────────────── */}
+      <div style={{ background: 'linear-gradient(160deg, #0e0e1c 0%, #08080f 100%)', minHeight: '100%' }} className="px-8 pt-7 pb-16">
+
+        {/* ── Header ────────────────────────────────────────────────────── */}
+        <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Call Report</h1>
-            <p className="text-xs text-slate-400 font-medium">
+            <h1 className="text-2xl font-black text-white tracking-tight">Activity Dashboard</h1>
+            <p className="text-xs font-medium mt-0.5" style={{ color: '#4b5563' }}>
               {lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString()}` : 'Loading data...'}
             </p>
           </div>
+          <div className="flex items-center gap-2">
+            <DateRangePicker startDate={startDate} endDate={endDate} onChange={handleDateChange} />
+            <button
+              onClick={() => load(startDate, endDate)}
+              disabled={isLoading}
+              className="w-10 h-10 rounded-2xl flex items-center justify-center transition-all disabled:opacity-40"
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', color: '#6b7280' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.1)'; (e.currentTarget as HTMLButtonElement).style.color = '#fff'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLButtonElement).style.color = '#6b7280'; }}
+            >
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <DateRangePicker
-            startDate={startDate}
-            endDate={endDate}
-            onChange={handleDateChange}
-          />
-          <button
-            onClick={() => load(startDate, endDate)}
-            disabled={isLoading}
-            className="w-10 h-10 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-brand-500 hover:border-brand-200 transition-all hover:shadow-md disabled:opacity-50"
-          >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
-      </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-4 gap-4">
-        <div className="bg-white rounded-[1.5rem] p-5 border border-slate-100 shadow-sm">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
-              <Users className="w-3.5 h-3.5 text-slate-500" />
+        {/* ── KPI Pills ─────────────────────────────────────────────────── */}
+        <div className="grid grid-cols-6 gap-3 mb-8">
+          {/* Cost / Call */}
+          <div className="rounded-2xl px-4 py-3.5 flex items-center gap-3" style={{ background: '#ca8a04', boxShadow: '0 8px 28px rgba(202,138,4,0.4)' }}>
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(0,0,0,0.2)' }}>
+              <Phone className="w-4 h-4 text-yellow-100" />
             </div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Agents</span>
-          </div>
-          <p className="text-2xl font-black text-slate-900 tracking-tight">{entries.length}</p>
-        </div>
-        <div className="bg-white rounded-[1.5rem] p-5 border border-slate-100 shadow-sm">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-7 h-7 rounded-lg bg-brand-50 flex items-center justify-center">
-              <PhoneIncoming className="w-3.5 h-3.5 text-brand-500" />
+            <div className="min-w-0">
+              <p className="text-[9px] font-black uppercase tracking-widest leading-none mb-1 text-yellow-200">Cost / Call</p>
+              <p className="text-base font-black text-white leading-none">
+                {totalCalls > 0 && totalSpend > 0 ? `$${(totalSpend / totalCalls).toFixed(2)}` : '—'}
+              </p>
             </div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Calls Received</span>
           </div>
-          <p className="text-2xl font-black text-slate-900 tracking-tight">{totalCalls.toLocaleString()}</p>
-        </div>
-        <div className="bg-white rounded-[1.5rem] p-5 border border-slate-100 shadow-sm">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center">
-              <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
+          {/* SCPA */}
+          <div className="rounded-2xl px-4 py-3.5 flex items-center gap-3" style={{ background: '#7c3aed', boxShadow: '0 8px 28px rgba(124,58,237,0.45)' }}>
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(0,0,0,0.2)' }}>
+              <BarChart3 className="w-4 h-4 text-purple-100" />
             </div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Valid Calls</span>
-          </div>
-          <p className="text-2xl font-black text-slate-900 tracking-tight">{totalValid.toLocaleString()}</p>
-          {totalCalls > 0 && (
-            <p className="text-xs text-emerald-600 font-bold mt-1">{Math.round(totalValid / totalCalls * 100)}% connection rate</p>
-          )}
-        </div>
-        <div className="bg-white rounded-[1.5rem] p-5 border border-slate-100 shadow-sm">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-7 h-7 rounded-lg bg-violet-50 flex items-center justify-center">
-              <Clock className="w-3.5 h-3.5 text-violet-500" />
+            <div className="min-w-0">
+              <p className="text-[9px] font-black uppercase tracking-widest leading-none mb-1 text-purple-200">SCPA</p>
+              <p className="text-base font-black text-white leading-none">
+                {totalSubmitted > 0 && totalSpend > 0 ? `$${(totalSpend / totalSubmitted).toFixed(2)}` : '—'}
+              </p>
             </div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Talk Time</span>
           </div>
-          <p className="text-2xl font-black text-slate-900 tracking-tight font-mono">{formatDuration(totalDuration)}</p>
-        </div>
-      </div>
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white rounded-[1.5rem] p-5 border border-slate-100 shadow-sm">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-7 h-7 rounded-lg bg-sky-50 flex items-center justify-center">
-              <CheckCircle className="w-3.5 h-3.5 text-sky-500" />
+          {/* ROAS */}
+          <div className="rounded-2xl px-4 py-3.5 flex items-center gap-3" style={{ background: '#059669', boxShadow: '0 8px 28px rgba(5,150,105,0.45)' }}>
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(0,0,0,0.2)' }}>
+              <TrendingUp className="w-4 h-4 text-emerald-100" />
             </div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Submitted</span>
-          </div>
-          <p className="text-2xl font-black text-slate-900 tracking-tight">{totalSubmitted.toLocaleString()}</p>
-          {totalValid > 0 && (
-            <p className="text-xs text-sky-600 font-bold mt-1">{((totalSubmitted / totalValid) * 100).toFixed(1)}% close rate</p>
-          )}
-        </div>
-        <div className="bg-white rounded-[1.5rem] p-5 border border-slate-100 shadow-sm">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-7 h-7 rounded-lg bg-rose-50 flex items-center justify-center">
-              <BarChart3 className="w-3.5 h-3.5 text-rose-500" />
+            <div className="min-w-0">
+              <p className="text-[9px] font-black uppercase tracking-widest leading-none mb-1 text-emerald-200">ROAS</p>
+              <p className="text-base font-black text-white leading-none">
+                {totalSpend > 0 ? `${(totalSubmittedPremium / totalSpend).toFixed(2)}×` : '—'}
+              </p>
             </div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Spend</span>
           </div>
-          <p className="text-2xl font-black text-slate-900 tracking-tight">${totalSpend.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
-          {totalSubmitted > 0 && (
-            <p className="text-xs text-rose-600 font-bold mt-1">${(totalSpend / totalSubmitted).toFixed(2)} SCPA</p>
-          )}
-        </div>
-        <div className="bg-white rounded-[1.5rem] p-5 border border-slate-100 shadow-sm">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center">
-              <BarChart3 className="w-3.5 h-3.5 text-amber-500" />
+          {/* Cost / Valid */}
+          <div className="rounded-2xl px-4 py-3.5 flex items-center gap-3" style={{ background: '#0284c7', boxShadow: '0 8px 28px rgba(2,132,199,0.45)' }}>
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(0,0,0,0.2)' }}>
+              <PhoneIncoming className="w-4 h-4 text-sky-100" />
             </div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Submitted Premium</span>
+            <div className="min-w-0">
+              <p className="text-[9px] font-black uppercase tracking-widest leading-none mb-1 text-sky-200">Cost / Valid</p>
+              <p className="text-base font-black text-white leading-none">
+                {totalValid > 0 && totalSpend > 0 ? `$${(totalSpend / totalValid).toFixed(2)}` : '—'}
+              </p>
+            </div>
           </div>
-          <p className="text-2xl font-black text-slate-900 tracking-tight">${totalSubmittedPremium.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
-          {totalSpend > 0 && (
-            <p className="text-xs text-amber-600 font-bold mt-1">{(totalSubmittedPremium / totalSpend).toFixed(2)}× ROAS</p>
-          )}
+          {/* Submitted */}
+          <div className="rounded-2xl px-4 py-3.5 flex items-center gap-3" style={{ background: '#e11d48', boxShadow: '0 8px 28px rgba(225,29,72,0.45)' }}>
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(0,0,0,0.2)' }}>
+              <CheckCircle className="w-4 h-4 text-rose-100" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[9px] font-black uppercase tracking-widest leading-none mb-1 text-rose-200">Submitted</p>
+              <p className="text-base font-black text-white leading-none">{totalSubmitted}</p>
+            </div>
+          </div>
+          {/* Close % */}
+          <div className="rounded-2xl px-4 py-3.5 flex items-center gap-3" style={{ background: '#2563eb', boxShadow: '0 8px 28px rgba(37,99,235,0.45)' }}>
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(0,0,0,0.2)' }}>
+              <Users className="w-4 h-4 text-blue-100" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[9px] font-black uppercase tracking-widest leading-none mb-1 text-blue-200">Close %</p>
+              <p className="text-base font-black text-white leading-none">
+                {totalValid > 0 ? `${((totalSubmitted / totalValid) * 100).toFixed(1)}%` : '—'}
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
 
-      {/* Agent Breakdown Table */}
-      <div className="bg-white rounded-[1.5rem] border border-slate-100 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 shrink-0">
-            <BarChart3 className="w-4 h-4 text-slate-400" />
-            <span className="text-sm font-bold text-slate-900">Agent Breakdown</span>
-            <span className="text-xs text-slate-400 font-medium">· {startDate} – {endDate}</span>
+        {/* ── Main Dark Card ─────────────────────────────────────────────── */}
+        <div className="rounded-3xl overflow-hidden" style={{ background: '#0d0d1a', border: '1px solid rgba(255,255,255,0.06)' }}>
+
+          {/* Summary Stats Strip */}
+          <div className="grid grid-cols-4 divide-x divide-white/5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+            <div className="px-7 py-5">
+              <p className="text-[10px] font-black uppercase tracking-widest mb-2" style={{ color: '#4b5563' }}>ROAS</p>
+              <p className="text-3xl font-black text-white leading-none">
+                {totalSpend > 0 ? `${(totalSubmittedPremium / totalSpend).toFixed(2)}×` : '—'}
+              </p>
+              {totalSpend > 0 && totalSubmittedPremium > 0 && (
+                <p className="text-xs font-bold mt-1.5" style={{ color: '#10b981' }}>
+                  from ${totalSubmittedPremium.toLocaleString(undefined, { maximumFractionDigits: 0 })} premium
+                </p>
+              )}
+            </div>
+            <div className="px-7 py-5">
+              <p className="text-[10px] font-black uppercase tracking-widest mb-2" style={{ color: '#4b5563' }}>Submitted Premium</p>
+              <p className="text-3xl font-black text-white leading-none">
+                ${totalSubmittedPremium.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+              </p>
+            </div>
+            <div className="px-7 py-5">
+              <p className="text-[10px] font-black uppercase tracking-widest mb-2" style={{ color: '#4b5563' }}>Total Spend</p>
+              <p className="text-3xl font-black text-white leading-none">
+                ${totalSpend.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+              </p>
+              {totalSubmitted > 0 && (
+                <p className="text-xs font-bold mt-1.5" style={{ color: '#f472b6' }}>
+                  ${(totalSpend / totalSubmitted).toFixed(2)} SCPA
+                </p>
+              )}
+            </div>
+            <div className="px-7 py-5">
+              <p className="text-[10px] font-black uppercase tracking-widest mb-2" style={{ color: '#4b5563' }}>Submitted</p>
+              <p className="text-3xl font-black text-white leading-none">{totalSubmitted}</p>
+              {totalValid > 0 && (
+                <p className="text-xs font-bold mt-1.5" style={{ color: '#60a5fa' }}>
+                  {((totalSubmitted / totalValid) * 100).toFixed(1)}% close rate
+                </p>
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-3">
+
+          {/* Toolbar */}
+          <div className="px-7 py-4 flex items-center justify-between gap-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
             <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400 pointer-events-none" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" style={{ color: '#4b5563' }} />
               <input
                 type="text"
                 value={agentSearch}
                 onChange={e => setAgentSearch(e.target.value)}
                 placeholder="Search agents…"
-                className="pl-7 pr-3 py-1.5 text-xs rounded-lg border border-slate-200 bg-slate-50 text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 w-40 transition-all"
+                className="pl-8 pr-3 py-2 text-xs rounded-xl text-white placeholder:text-slate-600 focus:outline-none w-44 transition-all"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
               />
             </div>
-            <span className="text-xs bg-slate-100 text-slate-500 font-bold px-2.5 py-1 rounded-lg shrink-0">{entries.length} agents</span>
+            <span className="text-xs font-bold px-3 py-1.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.05)', color: '#4b5563' }}>
+              {entries.length} agents
+            </span>
           </div>
+
+          {/* Table Column Headers */}
+          {!isLoading && !error && entries.length > 0 && (() => {
+            const toggleSort = (key: typeof sortKey) => {
+              if (sortKey === key) setSortDir(d => d === 'desc' ? 'asc' : 'desc');
+              else { setSortKey(key); setSortDir('desc'); }
+            };
+            const SortIcon = ({ col }: { col: typeof sortKey }) => sortKey === col
+              ? <ChevronUp className={`inline w-2.5 h-2.5 ml-0.5 transition-transform ${sortDir === 'asc' ? '' : 'rotate-180'}`} />
+              : <ChevronUp className="inline w-2.5 h-2.5 ml-0.5 opacity-0 group-hover:opacity-30" />;
+            return (
+              <div className="px-7 py-3 grid grid-cols-[1fr_5rem_4rem_4rem_4rem_5rem_5.5rem_5rem_7rem_7rem] gap-3 text-[10px] font-black uppercase tracking-wider" style={{ background: 'rgba(0,0,0,0.3)', borderBottom: '1px solid rgba(255,255,255,0.04)', color: '#374151' }}>
+                <button onClick={() => toggleSort('name')} className="group flex items-center gap-0.5 text-left hover:text-slate-400 transition-colors">Agent<SortIcon col="name" /></button>
+                <button onClick={() => toggleSort('calls_received')} className="group flex items-center justify-end gap-0.5 hover:text-slate-400 transition-colors">Total<SortIcon col="calls_received" /></button>
+                <button onClick={() => toggleSort('valid_calls')} className="group flex items-center justify-end gap-0.5 hover:text-slate-400 transition-colors">Valid<SortIcon col="valid_calls" /></button>
+                <button onClick={() => toggleSort('rate')} className="group flex items-center justify-end gap-0.5 hover:text-slate-400 transition-colors">Billable<SortIcon col="rate" /></button>
+                <button onClick={() => toggleSort('submitted')} className="group flex items-center justify-end gap-0.5 hover:text-slate-400 transition-colors">Subs<SortIcon col="submitted" /></button>
+                <button onClick={() => toggleSort('close')} className="group flex items-center justify-end gap-0.5 hover:text-slate-400 transition-colors">Close%<SortIcon col="close" /></button>
+                <button onClick={() => toggleSort('scpa')} className="group flex items-center justify-end gap-0.5 hover:text-slate-400 transition-colors">SCPA<SortIcon col="scpa" /></button>
+                <button onClick={() => toggleSort('roas')} className="group flex items-center justify-end gap-0.5 hover:text-slate-400 transition-colors">ROAS<SortIcon col="roas" /></button>
+                <button onClick={() => toggleSort('total_duration')} className="group flex items-center justify-end gap-0.5 hover:text-slate-400 transition-colors">Talk Time<SortIcon col="total_duration" /></button>
+                <button onClick={() => toggleSort('averageMin_perCall')} className="group flex items-center justify-end gap-0.5 hover:text-slate-400 transition-colors">Avg / Call<SortIcon col="averageMin_perCall" /></button>
+              </div>
+            );
+          })()}
+
+          {/* Loading State */}
+          {isLoading && (
+            <div className="flex items-center justify-center py-20 gap-3" style={{ color: '#374151' }}>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <span className="text-sm font-medium">Loading activity data...</span>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && !isLoading && (
+            <div className="flex flex-col items-center justify-center py-20 gap-3">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(239,68,68,0.1)' }}>
+                <AlertCircle className="w-6 h-6" style={{ color: '#ef4444' }} />
+              </div>
+              <p className="text-sm font-bold text-white">Unable to load data</p>
+              <p className="text-xs max-w-xs text-center" style={{ color: '#4b5563' }}>{error}</p>
+              <button
+                onClick={() => load()}
+                className="mt-2 px-4 py-2 text-xs font-bold rounded-xl transition-colors text-white"
+                style={{ background: 'rgba(255,255,255,0.08)' }}
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!isLoading && !error && entries.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-20 gap-3">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                <Phone className="w-6 h-6" style={{ color: '#1f2937' }} />
+              </div>
+              <p className="text-sm font-bold" style={{ color: '#374151' }}>No data for this period</p>
+            </div>
+          )}
+
+          {/* Data Rows + Totals */}
+          {!isLoading && !error && entries.length > 0 && (
+            <>
+              <div>
+                {[...entries]
+                  .filter(e => e.name?.toLowerCase().includes(agentSearch.toLowerCase()))
+                  .sort((a, b) => {
+                    let av: number, bv: number;
+                    if (sortKey === 'name') { av = a.name?.localeCompare(b.name ?? '') ?? 0; return sortDir === 'asc' ? av : -av; }
+                    if (sortKey === 'rate') { av = a.calls_received > 0 ? a.valid_calls / a.calls_received : 0; bv = b.calls_received > 0 ? b.valid_calls / b.calls_received : 0; }
+                    else if (sortKey === 'scpa') { av = (a.submitted ?? 0) > 0 ? (a.totalSpend ?? 0) / (a.submitted ?? 1) : 0; bv = (b.submitted ?? 0) > 0 ? (b.totalSpend ?? 0) / (b.submitted ?? 1) : 0; }
+                    else if (sortKey === 'close') { av = a.valid_calls > 0 ? ((a.submitted ?? 0) / a.valid_calls) * 100 : 0; bv = b.valid_calls > 0 ? ((b.submitted ?? 0) / b.valid_calls) * 100 : 0; }
+                    else if (sortKey === 'roas') { av = (a.totalSpend ?? 0) > 0 ? (a.submitted_premium ?? 0) / (a.totalSpend ?? 1) : 0; bv = (b.totalSpend ?? 0) > 0 ? (b.submitted_premium ?? 0) / (b.totalSpend ?? 1) : 0; }
+                    else { av = (a[sortKey as keyof typeof a] as number) ?? 0; bv = (b[sortKey as keyof typeof b] as number) ?? 0; }
+                    return sortDir === 'desc' ? bv - av : av - bv;
+                  })
+                  .map((entry, idx) => {
+                    const connectPct = entry.calls_received > 0 ? (entry.valid_calls / entry.calls_received) * 100 : 0;
+                    const scpa = (entry.submitted ?? 0) > 0 ? (entry.totalSpend ?? 0) / (entry.submitted ?? 1) : null;
+                    const closePct = entry.valid_calls > 0 ? ((entry.submitted ?? 0) / entry.valid_calls) * 100 : null;
+                    const roas = (entry.totalSpend ?? 0) > 0 ? (entry.submitted_premium ?? 0) / (entry.totalSpend ?? 1) : null;
+                    const billableColor = connectPct >= 60 ? '#10b981' : connectPct >= 30 ? '#f59e0b' : '#374151';
+                    return (
+                      <div
+                        key={entry.id}
+                        className="px-7 py-3.5 grid grid-cols-[1fr_5rem_4rem_4rem_4rem_5rem_5.5rem_5rem_7rem_7rem] gap-3 items-center transition-colors cursor-default"
+                        style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+                        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
+                        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <AgentAvatar name={entry.name} index={idx} />
+                          <p className="text-sm font-semibold text-white truncate capitalize">{entry.name}</p>
+                        </div>
+                        <p className="text-sm text-right tabular-nums" style={{ color: '#4b5563' }}>{entry.calls_received ?? 0}</p>
+                        <p className="text-sm font-bold text-white text-right tabular-nums">{entry.valid_calls ?? 0}</p>
+                        <p className="text-sm font-bold text-right tabular-nums" style={{ color: billableColor }}>{connectPct.toFixed(1)}%</p>
+                        <p className="text-sm font-bold text-right tabular-nums" style={{ color: '#38bdf8' }}>{entry.submitted ?? 0}</p>
+                        <p className="text-xs font-bold text-right tabular-nums" style={{ color: '#34d399' }}>{closePct !== null ? `${closePct.toFixed(1)}%` : '—'}</p>
+                        <p className="text-xs font-bold text-right tabular-nums" style={{ color: '#f472b6' }}>{scpa !== null ? `$${scpa.toFixed(2)}` : '—'}</p>
+                        <p className="text-xs font-bold text-right tabular-nums" style={{ color: '#fbbf24' }}>{roas !== null ? `${roas.toFixed(2)}×` : '—'}</p>
+                        <p className="text-xs font-mono text-right tabular-nums" style={{ color: '#64748b' }}>{formatDuration(entry.total_duration)}</p>
+                        <p className="text-xs font-mono text-right tabular-nums" style={{ color: '#334155' }}>{formatDuration(entry.averageMin_perCall)}</p>
+                      </div>
+                    );
+                  })}
+              </div>
+
+              {/* Totals Row */}
+              <div
+                className="px-7 py-4 grid grid-cols-[1fr_5rem_4rem_4rem_4rem_5rem_5.5rem_5rem_7rem_7rem] gap-3 items-center"
+                style={{ background: 'rgba(255,255,255,0.03)', borderTop: '1px solid rgba(255,255,255,0.08)' }}
+              >
+                <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: '#4b5563' }}>TOTAL</p>
+                <p className="text-sm font-black text-white text-right tabular-nums">{totalCalls.toLocaleString()}</p>
+                <p className="text-sm font-black text-white text-right tabular-nums">{totalValid.toLocaleString()}</p>
+                <p className="text-sm font-black text-right tabular-nums" style={{ color: '#10b981' }}>
+                  {totalCalls > 0 ? `${((totalValid / totalCalls) * 100).toFixed(1)}%` : '—'}
+                </p>
+                <p className="text-sm font-black text-right tabular-nums" style={{ color: '#38bdf8' }}>{totalSubmitted}</p>
+                <p className="text-xs font-black text-right tabular-nums" style={{ color: '#34d399' }}>
+                  {totalValid > 0 ? `${((totalSubmitted / totalValid) * 100).toFixed(1)}%` : '—'}
+                </p>
+                <p className="text-xs font-black text-right tabular-nums" style={{ color: '#f472b6' }}>
+                  {totalSubmitted > 0 ? `$${(totalSpend / totalSubmitted).toFixed(2)}` : '—'}
+                </p>
+                <p className="text-xs font-black text-right tabular-nums" style={{ color: '#fbbf24' }}>
+                  {totalSpend > 0 ? `${(totalSubmittedPremium / totalSpend).toFixed(2)}×` : '—'}
+                </p>
+                <p className="text-xs font-mono font-black text-right tabular-nums" style={{ color: '#64748b' }}>{formatDuration(totalDuration)}</p>
+                <p className="text-xs font-mono text-right tabular-nums" style={{ color: '#1e293b' }}>—</p>
+              </div>
+            </>
+          )}
+
         </div>
-
-        {!isLoading && !error && entries.length > 0 && (() => {
-          const toggleSort = (key: typeof sortKey) => {
-            if (sortKey === key) setSortDir(d => d === 'desc' ? 'asc' : 'desc');
-            else { setSortKey(key); setSortDir('desc'); }
-          };
-          const SortIcon = ({ col }: { col: typeof sortKey }) => sortKey === col
-            ? <ChevronUp className={`inline w-2.5 h-2.5 ml-0.5 transition-transform ${sortDir === 'asc' ? '' : 'rotate-180'}`} />
-            : <ChevronUp className="inline w-2.5 h-2.5 ml-0.5 opacity-0 group-hover:opacity-40" />;
-          return (
-            <div className="px-6 py-2.5 grid grid-cols-[1fr_5rem_4rem_4rem_4rem_5rem_5.5rem_5rem_7rem_7rem] gap-3 text-[10px] font-black text-slate-400 uppercase tracking-wider border-b border-slate-100 bg-slate-50/60">
-              <button onClick={() => toggleSort('name')} className="group flex items-center gap-0.5 text-left hover:text-slate-600 transition-colors">Agent<SortIcon col="name" /></button>
-              <button onClick={() => toggleSort('calls_received')} className="group flex items-center justify-end gap-0.5 hover:text-slate-600 transition-colors">Total<SortIcon col="calls_received" /></button>
-              <button onClick={() => toggleSort('valid_calls')} className="group flex items-center justify-end gap-0.5 hover:text-slate-600 transition-colors">Valid<SortIcon col="valid_calls" /></button>
-              <button onClick={() => toggleSort('rate')} className="group flex items-center justify-end gap-0.5 hover:text-slate-600 transition-colors">Billable<SortIcon col="rate" /></button>
-              <button onClick={() => toggleSort('submitted')} className="group flex items-center justify-end gap-0.5 hover:text-slate-600 transition-colors">Submitted<SortIcon col="submitted" /></button>
-              <button onClick={() => toggleSort('close')} className="group flex items-center justify-end gap-0.5 hover:text-slate-600 transition-colors">Close%<SortIcon col="close" /></button>
-              <button onClick={() => toggleSort('scpa')} className="group flex items-center justify-end gap-0.5 hover:text-slate-600 transition-colors">SCPA<SortIcon col="scpa" /></button>
-              <button onClick={() => toggleSort('roas')} className="group flex items-center justify-end gap-0.5 hover:text-slate-600 transition-colors">ROAS<SortIcon col="roas" /></button>
-              <button onClick={() => toggleSort('total_duration')} className="group flex items-center justify-end gap-0.5 hover:text-slate-600 transition-colors">Talk Time<SortIcon col="total_duration" /></button>
-              <button onClick={() => toggleSort('averageMin_perCall')} className="group flex items-center justify-end gap-0.5 hover:text-slate-600 transition-colors">Avg / Call<SortIcon col="averageMin_perCall" /></button>
-            </div>
-          );
-        })()}
-
-        {isLoading && (
-          <div className="flex items-center justify-center py-16 gap-3 text-slate-400">
-            <Loader2 className="w-5 h-5 animate-spin" />
-            <span className="text-sm font-medium">Loading call report...</span>
-          </div>
-        )}
-
-        {error && !isLoading && (
-          <div className="flex flex-col items-center justify-center py-16 gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center">
-              <AlertCircle className="w-6 h-6 text-red-400" />
-            </div>
-            <p className="text-sm font-bold text-slate-700">Unable to load data</p>
-            <p className="text-xs text-slate-400 max-w-xs text-center">{error}</p>
-            <button
-              onClick={() => load()}
-              className="mt-2 px-4 py-2 bg-slate-900 text-white text-xs font-bold rounded-xl hover:bg-slate-800 transition-colors"
-            >
-              Retry
-            </button>
-          </div>
-        )}
-
-        {!isLoading && !error && entries.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-16 gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center">
-              <Phone className="w-6 h-6 text-slate-300" />
-            </div>
-            <p className="text-sm font-bold text-slate-500">No data for this period</p>
-          </div>
-        )}
-
-        {!isLoading && !error && entries.length > 0 && (
-          <div className="divide-y divide-slate-100">
-            {[...entries]
-              .filter(e => e.name?.toLowerCase().includes(agentSearch.toLowerCase()))
-              .sort((a, b) => {
-                let av: number, bv: number;
-                if (sortKey === 'name') { av = a.name?.localeCompare(b.name ?? '') ?? 0; return sortDir === 'asc' ? av : -av; }
-                if (sortKey === 'rate') { av = a.calls_received > 0 ? a.valid_calls / a.calls_received : 0; bv = b.calls_received > 0 ? b.valid_calls / b.calls_received : 0; }
-                else if (sortKey === 'scpa') { av = (a.submitted ?? 0) > 0 ? (a.totalSpend ?? 0) / (a.submitted ?? 1) : 0; bv = (b.submitted ?? 0) > 0 ? (b.totalSpend ?? 0) / (b.submitted ?? 1) : 0; }
-                else if (sortKey === 'close') { av = a.valid_calls > 0 ? ((a.submitted ?? 0) / a.valid_calls) * 100 : 0; bv = b.valid_calls > 0 ? ((b.submitted ?? 0) / b.valid_calls) * 100 : 0; }
-                else if (sortKey === 'roas') { av = (a.totalSpend ?? 0) > 0 ? (a.submitted_premium ?? 0) / (a.totalSpend ?? 1) : 0; bv = (b.totalSpend ?? 0) > 0 ? (b.submitted_premium ?? 0) / (b.totalSpend ?? 1) : 0; }
-                else { av = (a[sortKey as keyof typeof a] as number) ?? 0; bv = (b[sortKey as keyof typeof b] as number) ?? 0; }
-                return sortDir === 'desc' ? bv - av : av - bv;
-              })
-              .map((entry, idx) => {
-              const connectPct = entry.calls_received > 0
-                ? (entry.valid_calls / entry.calls_received) * 100
-                : 0;
-              const pctColor = connectPct >= 60 ? 'text-emerald-600' : connectPct >= 30 ? 'text-amber-600' : 'text-slate-400';
-              const scpa = (entry.submitted ?? 0) > 0 ? (entry.totalSpend ?? 0) / (entry.submitted ?? 1) : null;
-              const closePct = entry.valid_calls > 0 ? ((entry.submitted ?? 0) / entry.valid_calls) * 100 : null;
-              const roas = (entry.totalSpend ?? 0) > 0 ? (entry.submitted_premium ?? 0) / (entry.totalSpend ?? 1) : null;
-              return (
-                <div
-                  key={entry.id}
-                  className="px-6 py-3.5 grid grid-cols-[1fr_5rem_4rem_4rem_4rem_5rem_5.5rem_5rem_7rem_7rem] gap-3 items-center hover:bg-slate-50/60 transition-colors"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <AgentAvatar name={entry.name} index={idx} />
-                    <p className="text-sm font-semibold text-slate-800 truncate capitalize">{entry.name}</p>
-                  </div>
-                  <p className="text-sm text-slate-600 text-right tabular-nums">{entry.calls_received ?? 0}</p>
-                  <p className="text-sm font-bold text-slate-900 text-right tabular-nums">{entry.valid_calls ?? 0}</p>
-                  <p className={`text-sm font-bold text-right tabular-nums ${pctColor}`}>{connectPct.toFixed(1)}%</p>
-                  <p className="text-sm font-bold text-sky-700 text-right tabular-nums">{entry.submitted ?? 0}</p>
-                  <p className="text-xs font-bold text-emerald-600 text-right tabular-nums">{closePct !== null ? `${closePct.toFixed(1)}%` : '—'}</p>
-                  <p className="text-xs font-bold text-rose-600 text-right tabular-nums">{scpa !== null ? `$${scpa.toFixed(2)}` : '—'}</p>
-                  <p className="text-xs font-bold text-amber-600 text-right tabular-nums">{roas !== null ? `${roas.toFixed(2)}×` : '—'}</p>
-                  <p className="text-xs font-mono text-slate-700 text-right tabular-nums">{formatDuration(entry.total_duration)}</p>
-                  <p className="text-xs font-mono text-slate-400 text-right tabular-nums">{formatDuration(entry.averageMin_perCall)}</p>
-                </div>
-              );
-            })}
-          </div>
-        )}
       </div>
     </div>
   );
