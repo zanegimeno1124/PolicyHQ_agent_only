@@ -184,11 +184,19 @@ export const RealtimeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     if (!xanoClient || !token || !user) return;
 
-    xanoClient.setRealtimeAuthToken(token);
-    
-    const userChannel = xanoClient.channel(`notification_channel/${user.id}`);
-    const broadcastChannel = xanoClient.channel(`notification_channel/*`);
-    const leaderBoardChannel = xanoClient.channel(`vipaleaderboard`);
+    let userChannel: any = null;
+    let broadcastChannel: any = null;
+    let leaderBoardChannel: any = null;
+
+    try {
+      xanoClient.setRealtimeAuthToken(token);
+      userChannel = xanoClient.channel(`notification_channel/${user.id}`);
+      broadcastChannel = xanoClient.channel(`notification_channel/*`);
+      leaderBoardChannel = xanoClient.channel(`vipaleaderboard`);
+    } catch (e) {
+      console.warn('Realtime channel setup failed (WebSocket not ready):', e);
+      return;
+    }
 
     const notificationListener = (message: any, type: 'direct' | 'broadcast') => {
       const content = message.payload || message.data || message;
@@ -244,8 +252,12 @@ export const RealtimeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return () => {
       const safeUnsubscribe = (channel: any) => {
           if (!channel) return;
-          if (typeof channel.destroy === 'function') channel.destroy();
-          else if (typeof channel.unsubscribe === 'function') channel.unsubscribe();
+          try {
+            if (typeof channel.destroy === 'function') channel.destroy();
+            else if (typeof channel.unsubscribe === 'function') channel.unsubscribe();
+          } catch (e) {
+            // WebSocket may still be in CONNECTING state; ignore
+          }
       };
       safeUnsubscribe(userChannel);
       safeUnsubscribe(broadcastChannel);

@@ -380,7 +380,7 @@ const AgentLayout: React.FC = () => {
             <SidebarItem to="/tickets" icon={<Ticket size={20} />} label="Tickets" active={isActive('/tickets')} locked={isLocked('ticketing')} collapsed={isCollapsed} />
             <SidebarGroup
               icon={<PhoneCall size={20} />}
-              label="Call Report"
+              label="Activity Dashboard"
               active={location.pathname.startsWith('/call-report')}
               collapsed={isCollapsed}
             >

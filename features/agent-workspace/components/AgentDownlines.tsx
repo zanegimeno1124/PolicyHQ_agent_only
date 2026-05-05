@@ -31,10 +31,7 @@ interface HierarchyResponse {
   id: string;
   first_name: string;
   last_name: string;
-  direct_downlines: {
-    itemsTotal: number;
-    items: HierarchyItem[];
-  }
+  direct_downlines: HierarchyItem[];
 }
 
 interface DateRange {
@@ -275,7 +272,7 @@ const AgentHierarchyNode: React.FC<{
       try {
         const data = await agentDownlineApi.getHierarchy(agent.agent_id);
         if (data && data.direct_downlines) {
-          setChildren(data.direct_downlines.items);
+          setChildren(data.direct_downlines);
         }
       } catch (error) {
         console.error("Failed to fetch sub-hierarchy", error);
@@ -446,13 +443,13 @@ export const AgentDownlines: React.FC = () => {
   }
 
   // Filter Sidebar Root Agents
-  const filteredRootAgents = rootHierarchy?.direct_downlines?.items.filter(agent => {
+  const filteredRootAgents = rootHierarchy?.direct_downlines?.filter(agent => {
       const search = sidebarSearch.toLowerCase();
       return agent.first_name.toLowerCase().includes(search) || agent.last_name.toLowerCase().includes(search);
   }) || [];
 
   // Filter Table Agents (from selectedHierarchyData)
-  const tableAgents = selectedHierarchyData?.direct_downlines?.items.filter(a => 
+  const tableAgents = selectedHierarchyData?.direct_downlines?.filter(a => 
     a.first_name.toLowerCase().includes(tableSearch.toLowerCase()) || 
     a.last_name.toLowerCase().includes(tableSearch.toLowerCase())
   ) || [];
@@ -467,7 +464,7 @@ export const AgentDownlines: React.FC = () => {
                 <h3 className="text-xs font-extrabold text-slate-900 uppercase tracking-widest">Team Structure</h3>
                 {rootHierarchy && (
                     <span className="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg text-[10px] font-bold">
-                        {rootHierarchy.direct_downlines.itemsTotal} Agents
+                        {rootHierarchy.direct_downlines.length} Agents
                     </span>
                 )}
              </div>
@@ -571,7 +568,7 @@ export const AgentDownlines: React.FC = () => {
                     <Users className="w-7 h-7" strokeWidth={2.5} />
                 </div>
                 <div>
-                    <h3 className="text-3xl font-black text-slate-900">{selectedHierarchyData?.direct_downlines?.itemsTotal || 0}</h3>
+                    <h3 className="text-3xl font-black text-slate-900">{selectedHierarchyData?.direct_downlines?.length || 0}</h3>
                     <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mt-1">Total Team</p>
                 </div>
               </div>
@@ -581,7 +578,7 @@ export const AgentDownlines: React.FC = () => {
                     <Award className="w-7 h-7" strokeWidth={2.5} />
                 </div>
                 <div>
-                    <h3 className="text-3xl font-black text-slate-900">{selectedHierarchyData?.direct_downlines?.items?.length || 0}</h3>
+                    <h3 className="text-3xl font-black text-slate-900">{selectedHierarchyData?.direct_downlines?.length || 0}</h3>
                     <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mt-1">Direct Agents</p>
                 </div>
               </div>
