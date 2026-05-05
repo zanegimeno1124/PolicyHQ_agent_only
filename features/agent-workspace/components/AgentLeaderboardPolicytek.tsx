@@ -282,6 +282,9 @@ export const AgentLeaderboardPolicytek: React.FC = () => {
   const totalCalls = entries.reduce((s, e) => s + (e.calls_received ?? 0), 0);
   const totalValid = entries.reduce((s, e) => s + (e.valid_calls ?? 0), 0);
   const totalDuration = entries.reduce((s, e) => s + (e.total_duration ?? 0), 0);
+  const totalSubmitted = entries.reduce((s, e) => s + (e.submitted ?? 0), 0);
+  const totalSpend = entries.reduce((s, e) => s + (e.totalSpend ?? 0), 0);
+  const totalSubmittedPremium = entries.reduce((s, e) => s + (e.submitted_premium ?? 0), 0);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -344,6 +347,44 @@ export const AgentLeaderboardPolicytek: React.FC = () => {
           <p className="text-2xl font-black text-slate-900 tracking-tight font-mono">{formatDuration(totalDuration)}</p>
         </div>
       </div>
+      <div className="grid grid-cols-3 gap-4">
+        <div className="bg-white rounded-[1.5rem] p-5 border border-slate-100 shadow-sm">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-8 h-8 rounded-xl bg-sky-50 flex items-center justify-center">
+              <CheckCircle className="w-4 h-4 text-sky-500" />
+            </div>
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Submitted</span>
+          </div>
+          <p className="text-2xl font-black text-slate-900 tracking-tight">{totalSubmitted.toLocaleString()}</p>
+          {totalValid > 0 && (
+            <p className="text-xs text-sky-600 font-bold mt-1">{((totalSubmitted / totalValid) * 100).toFixed(1)}% close rate</p>
+          )}
+        </div>
+        <div className="bg-white rounded-[1.5rem] p-5 border border-slate-100 shadow-sm">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-8 h-8 rounded-xl bg-rose-50 flex items-center justify-center">
+              <TrendingUp className="w-4 h-4 text-rose-500" />
+            </div>
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Spend</span>
+          </div>
+          <p className="text-2xl font-black text-slate-900 tracking-tight">${totalSpend.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
+          {totalSubmitted > 0 && (
+            <p className="text-xs text-rose-600 font-bold mt-1">${(totalSpend / totalSubmitted).toFixed(2)} SCPA</p>
+          )}
+        </div>
+        <div className="bg-white rounded-[1.5rem] p-5 border border-slate-100 shadow-sm">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-8 h-8 rounded-xl bg-amber-50 flex items-center justify-center">
+              <TrendingUp className="w-4 h-4 text-amber-500" />
+            </div>
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Submitted Premium</span>
+          </div>
+          <p className="text-2xl font-black text-slate-900 tracking-tight">${totalSubmittedPremium.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
+          {totalSpend > 0 && (
+            <p className="text-xs text-amber-600 font-bold mt-1">{(totalSubmittedPremium / totalSpend).toFixed(2)}× ROAS</p>
+          )}
+        </div>
+      </div>
 
       {/* Table */}
       <div className="bg-white rounded-[1.5rem] border border-slate-100 shadow-sm overflow-hidden">
@@ -358,11 +399,16 @@ export const AgentLeaderboardPolicytek: React.FC = () => {
         </div>
 
         {!isLoading && !error && entries.length > 0 && (
-          <div className="px-6 py-2 grid grid-cols-[2rem_1fr_5rem_5rem_6rem_6rem] gap-4 text-[10px] font-black text-slate-400 uppercase tracking-wider border-b border-slate-50">
+          <div className="px-6 py-2 grid grid-cols-[2rem_1fr_5rem_4rem_4rem_4rem_5rem_5.5rem_5rem_6rem_6rem] gap-4 text-[10px] font-black text-slate-400 uppercase tracking-wider border-b border-slate-50">
             <span>#</span>
             <span>Agent</span>
-            <span className="text-right">Received</span>
+            <span className="text-right">Total</span>
             <span className="text-right">Valid</span>
+            <span className="text-right">Billable</span>
+            <span className="text-right">Subs</span>
+            <span className="text-right">Close%</span>
+            <span className="text-right">SCPA</span>
+            <span className="text-right">ROAS</span>
             <span className="text-right">Talk Time</span>
             <span className="text-right">Avg / Call</span>
           </div>
@@ -408,10 +454,15 @@ export const AgentLeaderboardPolicytek: React.FC = () => {
                 entries[0]?.valid_calls > 0
                   ? Math.round((entry.valid_calls / entries[0].valid_calls) * 100)
                   : 0;
+              const billablePct = entry.calls_received > 0 ? (entry.valid_calls / entry.calls_received) * 100 : 0;
+              const billableColor = billablePct >= 60 ? 'text-emerald-600' : billablePct >= 30 ? 'text-amber-600' : 'text-slate-400';
+              const scpa = (entry.submitted ?? 0) > 0 ? (entry.totalSpend ?? 0) / (entry.submitted ?? 1) : null;
+              const closePct = entry.valid_calls > 0 ? ((entry.submitted ?? 0) / entry.valid_calls) * 100 : null;
+              const roas = (entry.totalSpend ?? 0) > 0 ? (entry.submitted_premium ?? 0) / (entry.totalSpend ?? 1) : null;
               return (
                 <div
                   key={entry.id}
-                  className={`px-6 py-4 grid grid-cols-[2rem_1fr_5rem_5rem_6rem_6rem] gap-4 items-center transition-colors hover:bg-slate-50/50 ${
+                  className={`px-6 py-4 grid grid-cols-[2rem_1fr_5rem_4rem_4rem_4rem_5rem_5.5rem_5rem_6rem_6rem] gap-4 items-center transition-colors hover:bg-slate-50/50 ${
                     rank <= 3 ? 'bg-gradient-to-r from-slate-50/50 to-transparent' : ''
                   }`}
                 >
@@ -429,6 +480,11 @@ export const AgentLeaderboardPolicytek: React.FC = () => {
                   </div>
                   <p className="text-sm font-bold text-slate-700 text-right">{entry.calls_received ?? 0}</p>
                   <p className="text-sm font-black text-slate-900 text-right">{entry.valid_calls ?? 0}</p>
+                  <p className={`text-sm font-bold text-right ${billableColor}`}>{billablePct.toFixed(1)}%</p>
+                  <p className="text-sm font-bold text-sky-700 text-right">{entry.submitted ?? 0}</p>
+                  <p className="text-xs font-bold text-emerald-600 text-right">{closePct !== null ? `${closePct.toFixed(1)}%` : '—'}</p>
+                  <p className="text-xs font-bold text-rose-600 text-right">{scpa !== null ? `$${scpa.toFixed(2)}` : '—'}</p>
+                  <p className="text-xs font-bold text-amber-600 text-right">{roas !== null ? `${roas.toFixed(2)}×` : '—'}</p>
                   <p className="text-xs font-mono font-bold text-slate-700 text-right">{formatDuration(entry.total_duration)}</p>
                   <p className="text-xs font-mono text-slate-400 text-right">{formatDuration(entry.averageMin_perCall)}</p>
                 </div>

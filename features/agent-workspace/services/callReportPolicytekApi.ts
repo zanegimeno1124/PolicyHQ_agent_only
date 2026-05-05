@@ -15,6 +15,9 @@ export interface PolicytekCallEntry {
   valid_calls: number;
   total_duration: number;  // seconds
   averageMin_perCall: number;  // seconds
+  submitted?: number;
+  submitted_premium?: number;
+  totalSpend?: number;
 }
 
 /** Returns the Friday that starts the current business week (Fri–Thu) */
